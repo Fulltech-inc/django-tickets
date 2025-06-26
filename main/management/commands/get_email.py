@@ -94,18 +94,26 @@ def process_inbox(quiet=False):
     server.logout()
 
 
-def decodeUnknown(charset, string):
-    if not charset:
+def decodeUnknown(value, charset='utf-8'):
+    if isinstance(value, bytes):
         try:
-            return string.decode('utf-8', 'ignore')
+            return value.decode(charset, errors='ignore')
         except:
-            return string.decode('iso8859-1', 'ignore')
-    return unicode(string, charset)
+            return value.decode('iso8859-1', errors='ignore')
+    elif isinstance(value, str):
+        return value
+    else:
+        return str(value)
+
 
 
 def decode_mail_headers(string):
     decoded = decode_header(string)
-    return u' '.join([unicode(msg, charset or 'utf-8') for msg, charset in decoded])
+    return u' '.join([
+        msg if isinstance(msg, str) else msg.decode(charset or 'utf-8', errors='ignore')
+        for msg, charset in decoded
+    ])
+
 
 
 def ticket_from_message(message, quiet):
@@ -113,7 +121,7 @@ def ticket_from_message(message, quiet):
     Create a ticket or a followup (if ticket id in subject)
     """
     msg = message
-    message = email.message_from_string(msg)
+    message = email.message_from_bytes(msg)
     subject = message.get('subject', 'Created from e-mail')
     subject = decode_mail_headers(decodeUnknown(message.get_charset(), subject))
     sender = message.get('from', ('Unknown Sender'))
@@ -266,7 +274,7 @@ def ticket_from_message(message, quiet):
 
         if file['content']:
 
-            filename = file['filename'].encode('ascii', 'replace').replace(' ', '_')
+            filename = file['filename'].replace(' ', '_').encode('ascii', 'replace').decode('ascii')
             filename = re.sub('[^a-zA-Z0-9._-]+', '', filename)
 
             # if followup
@@ -291,7 +299,8 @@ def ticket_from_message(message, quiet):
             a.save()
 
             if not quiet:
-                print " - %s" % filename
+                print(" - %s" % filename)
+
 
     if int(subject_id) in ticket_ids:
         return f

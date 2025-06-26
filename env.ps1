@@ -1,4 +1,3 @@
-
 $env:DJANGO_SECRET_KEY = "this-is-temporary-and-insecure"
 $env:DJANGO_PRODUCTION_DOMAIN = "pinesofttechnologies.co.za"
 

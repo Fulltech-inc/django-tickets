@@ -104,10 +104,16 @@ ADMINS = ((os.environ["DJANGO_ADMIN_NAME"],
 MANAGERS = ((os.environ["DJANGO_ADMIN_NAME"],
              os.environ["DJANGO_ADMIN_EMAIL"]), )
 
-# Email delivery to local Postfix-Installation
+# Email configuration using authenticated SMTP
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = os.environ["DJANGO_EMAIL_HOST"]
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_USE_SSL = False
 EMAIL_HOST_USER = os.environ["DJANGO_EMAIL_HOST_USER"]
 EMAIL_HOST_PASSWORD = os.environ["DJANGO_EMAIL_HOST_PASSWORD"]
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
 
 # Logging
 LOGGING = {
