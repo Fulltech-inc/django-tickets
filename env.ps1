@@ -12,16 +12,16 @@ $env:DJANGO_MEDIA_ROOT = "C:\Users\SPENCER\Documents\GitHub\django-tickets\media
 $env:DJANGO_ADMIN_NAME = "Spencer"
 $env:DJANGO_ADMIN_EMAIL = "spencertasatech@gmail.com"
 
-# Django email configuration
+# Django email (SMTP) configuration
 $env:DJANGO_EMAIL_HOST = "mail.pinesofttechnologies.co.za"
-$env:DJANGO_EMAIL_HOST_USER = "dev@pinesofttechnologies.co.za"
-$env:DJANGO_EMAIL_HOST_PASSWORD = "Pinesoft#2030"
+$env:DJANGO_EMAIL_HOST_USER = "noreply@pinesofttechnologies.co.za"
+$env:DJANGO_EMAIL_HOST_PASSWORD = "Xcally#2030"
 
-# ticket email inbox, see 'main/management/commands/get_email.py'
+# ticket email inbox (IMAP)
 $env:DJANGO_TICKET_INBOX_SERVER = "mail.pinesofttechnologies.co.za"
-$env:DJANGO_TICKET_INBOX_USER = "dev@pinesofttechnologies.co.za"
-$env:DJANGO_TICKET_INBOX_PASSWORD = "Pinesoft#2030"
+$env:DJANGO_TICKET_INBOX_USER = "tickets@pinesofttechnologies.co.za"
+$env:DJANGO_TICKET_INBOX_PASSWORD = "Xcally#2030"
 
-# email notifications to admin, see 'main/management/commands/get_email.py'
-$env:DJANGO_TICKET_EMAIL_NOTIFICATIONS_FROM = "dev@pinesofttechnologies.co.za"
-$env:DJANGO_TICKET_EMAIL_NOTIFICATIONS_TO = "dev@pinesofttechnologies.co.za"
+# email notifications
+$env:DJANGO_TICKET_EMAIL_NOTIFICATIONS_FROM = "noreply@pinesofttechnologies.co.za"
+$env:DJANGO_TICKET_EMAIL_NOTIFICATIONS_TO = "admin@pinesofttechnologies.co.za"
