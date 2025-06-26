@@ -24,8 +24,5 @@ db.sqlite3
 # virtual evironment
 .venv
 
-# bash script to set environment variables
-env.ps1
-
 # static root folder for local deployments
 static_root
