@@ -21,8 +21,11 @@ media/
 # database not in repo
 db.sqlite3
 
+# virtual evironment
+.venv
+
 # bash script to set environment variables
-env.sh
+env.ps1
 
 # static root folder for local deployments
 static_root
