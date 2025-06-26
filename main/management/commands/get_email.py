@@ -306,7 +306,3 @@ def ticket_from_message(message, quiet):
         return f
     else:
         return t
-
-
-if __name__ == '__main__':
-    process_email()
