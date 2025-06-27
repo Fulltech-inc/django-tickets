@@ -287,3 +287,6 @@
 [27/Jun/2025 12:30:59] INFO                        [django.server:124] "GET /my-tickets/ HTTP/1.1" 200 6670
 [27/Jun/2025 12:31:00] INFO                        [django.server:124] "GET /inbox/ HTTP/1.1" 200 5341
 [27/Jun/2025 12:31:06] INFO                        [django.server:124] "GET /archive/ HTTP/1.1" 200 5320
+[27/Jun/2025 12:39:38] INFO                        [django.server:124] "GET /inbox/ HTTP/1.1" 200 5341
+[27/Jun/2025 12:39:40] INFO                        [django.server:124] "GET /logout/ HTTP/1.1" 302 0
+[27/Jun/2025 12:39:40] INFO                        [django.server:124] "GET / HTTP/1.1" 200 7654
