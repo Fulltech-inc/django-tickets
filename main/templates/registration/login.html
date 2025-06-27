@@ -112,7 +112,7 @@
                         <h4 class="modal-title" id="myModalLabel">Please sign in</h4>
                     </div>
                     <div class="modal-body">
-                        <form class="form-signin" role="form" method="post" action="{% url 'django.contrib.auth.views.login' %}">
+                        <form class="form-signin" role="form" method="post" action="{% url 'login' %}">
                             {% csrf_token %}
                             <!-- <h2 class="form-signin-heading">Please sign in</h2> -->
                             <label for="login-username" class="sr-only">User name</label>

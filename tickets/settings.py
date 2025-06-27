@@ -3,8 +3,6 @@
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
 import socket
-# request.path in templates:
-from django.conf.global_settings import TEMPLATE_CONTEXT_PROCESSORS as TCP
 
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
@@ -12,14 +10,13 @@ SECRET_KEY = os.environ["DJANGO_SECRET_KEY"]
 
 if socket.gethostname() == os.environ["DJANGO_PRODUCTION_DOMAIN"]:
     DEBUG = False
-    TEMPLATE_DEBUG = False
     ALLOWED_HOSTS = ['*']
     # SSL/HTTPS
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
 else:
     DEBUG = True
-    TEMPLATE_DEBUG = True
+
 
 # Application definition
 
@@ -34,9 +31,23 @@ INSTALLED_APPS = (
     'main',
 )
 
-TEMPLATE_CONTEXT_PROCESSORS = TCP + (
-    'django.core.context_processors.request',
-)
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],  # your templates directory
+        'APP_DIRS': True,
+        'OPTIONS': {
+            'context_processors': [
+                'django.template.context_processors.debug',
+                'django.template.context_processors.request',
+                'django.contrib.auth.context_processors.auth',
+                'django.contrib.messages.context_processors.messages',
+            ],
+        },
+    },
+]
+
+
 
 MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
