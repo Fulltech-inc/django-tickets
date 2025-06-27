@@ -6,7 +6,7 @@ import socket
 
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
-SECRET_KEY = os.environ["DJANGO_SECRET_KEY"]
+SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "dev-secret-key")
 
 if socket.gethostname() == os.environ["DJANGO_PRODUCTION_DOMAIN"]:
     DEBUG = False
@@ -59,6 +59,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
 
+
 ROOT_URLCONF = 'tickets.urls'
 
 WSGI_APPLICATION = 'tickets.wsgi.application'
@@ -87,12 +88,12 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 
 STATIC_URL = '/static/'
-STATIC_ROOT = os.environ["DJANGO_STATIC_ROOT"]
+STATIC_ROOT = os.environ.get("DJANGO_STATIC_ROOT", os.path.join(BASE_DIR, 'staticfiles'))
 
 STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static'), )
 
 MEDIA_URL = '/media/'
-MEDIA_ROOT = os.environ["DJANGO_MEDIA_ROOT"]
+MEDIA_ROOT = os.environ.get("DJANGO_MEDIA_ROOT", os.path.join(BASE_DIR, 'media'))
 
 # On login do not redirect to "/accounts/profile/" but "/inbox/"
 LOGIN_REDIRECT_URL = "/inbox/"

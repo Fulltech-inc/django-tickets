@@ -17,43 +17,46 @@ def inbox_view(request):
     users = User.objects.all()
     tickets_unassigned = Ticket.objects.exclude(assigned_to__in=users)
     tickets_assigned = Ticket.objects.filter(assigned_to__in=users)
-    return render(request, 'main/inbox.html', {
+    context = {
         "tickets_assigned": tickets_assigned,
         "tickets_unassigned": tickets_unassigned,
-    })
+    }
+    return render(request, 'main/inbox.html', dict(context))
 
 
 def my_tickets_view(request):
     tickets = Ticket.objects.filter(assigned_to=request.user).exclude(status="DONE")
     tickets_waiting = Ticket.objects.filter(waiting_for=request.user, status="WAITING")
-    return render(request, 'main/my-tickets.html', {
+    context = {
         "tickets": tickets,
         "tickets_waiting": tickets_waiting,
-    })
+    }
+    return render(request, 'main/my-tickets.html', dict(context))
 
 
 def all_tickets_view(request):
     tickets_open = Ticket.objects.exclude(status="DONE")
-    return render(request, 'main/all-tickets.html', {"tickets": tickets_open})
+    context = {"tickets": tickets_open}
+    return render(request, 'main/all-tickets.html', dict(context))
 
 
 def archive_view(request):
     tickets_closed = Ticket.objects.filter(status="DONE")
-    return render(request, 'main/archive.html', {"tickets": tickets_closed})
+    context = {"tickets": tickets_closed}
+    return render(request, 'main/archive.html', dict(context))
 
 
 def usersettings_update_view(request):
     user = request.user
     if request.method == 'POST':
-        form_user = UserSettingsForm(request.POST)
+        form_user = UserSettingsForm(request.POST, instance=user)
         if form_user.is_valid():
-            user.first_name = request.POST['first_name']
-            user.last_name = request.POST['last_name']
-            user.save()
+            form_user.save()
             return HttpResponseRedirect(request.GET.get('next', '/inbox/'))
     else:
         form_user = UserSettingsForm(instance=user)
-    return render(request, 'main/settings.html', {'form_user': form_user})
+    context = {'form_user': form_user}
+    return render(request, 'main/settings.html', dict(context))
 
 
 def ticket_create_view(request):
@@ -67,7 +70,8 @@ def ticket_create_view(request):
             return redirect('inbox')
     else:
         form = TicketCreateForm()
-    return render(request, 'main/ticket_edit.html', {'form': form})
+    context = {'form': form}
+    return render(request, 'main/ticket_edit.html', dict(context))
 
 
 def ticket_edit_view(request, pk):
@@ -81,18 +85,20 @@ def ticket_edit_view(request, pk):
             return redirect('inbox')
     else:
         form = TicketEditForm(instance=data)
-    return render(request, 'main/ticket_edit.html', {'form': form})
+    context = {'form': form}
+    return render(request, 'main/ticket_edit.html', dict(context))
 
 
 def ticket_detail_view(request, pk):
     ticket = get_object_or_404(Ticket, id=pk)
     attachments = Attachment.objects.filter(ticket=ticket)
     followups = FollowUp.objects.filter(ticket=ticket)
-    return render(request, 'main/ticket_detail.html', {
+    context = {
         'ticket': ticket,
         'attachments': attachments,
         'followups': followups,
-    })
+    }
+    return render(request, 'main/ticket_detail.html', dict(context))
 
 
 def followup_create_view(request):
@@ -116,7 +122,8 @@ def followup_create_view(request):
             return redirect('inbox')
     else:
         form = FollowupForm(initial={'ticket': request.GET.get('ticket'), 'user': request.user})
-    return render(request, 'main/followup_edit.html', {'form': form})
+    context = {'form': form}
+    return render(request, 'main/followup_edit.html', dict(context))
 
 
 def followup_edit_view(request, pk):
@@ -128,7 +135,8 @@ def followup_edit_view(request, pk):
             return redirect('inbox')
     else:
         form = FollowupForm(instance=data)
-    return render(request, 'main/followup_edit.html', {'form': form})
+    context = {'form': form}
+    return render(request, 'main/followup_edit.html', dict(context))
 
 
 def attachment_create_view(request):
@@ -145,4 +153,5 @@ def attachment_create_view(request):
             return redirect('inbox')
     else:
         form = AttachmentForm()
-    return render(request, 'main/attachment_add.html', {'form': form})
+    context = {'form': form}
+    return render(request, 'main/attachment_add.html', dict(context))
