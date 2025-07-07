@@ -120,22 +120,20 @@ CRISPY_TEMPLATE_PACK = 'bootstrap3'
 # Define who gets code error notifications.
 # When DEBUG=False and a view raises an exception,
 # Django will email these people with the full exception information.
-ADMINS = ((os.environ["DJANGO_ADMIN_NAME"],
-           os.environ["DJANGO_ADMIN_EMAIL"]), )
+admin_name = os.environ.get("DJANGO_ADMIN_NAME")
+admin_email = os.environ.get("DJANGO_ADMIN_EMAIL")
+ADMINS = [(admin_name, admin_email)] if admin_name and admin_email else []
+MANAGERS = [(admin_name, admin_email)] if admin_name and admin_email else []
 
-# Specifies who should get broken link notifications when
-# BrokenLinkEmailsMiddleware is enabled.
-MANAGERS = ((os.environ["DJANGO_ADMIN_NAME"],
-             os.environ["DJANGO_ADMIN_EMAIL"]), )
 
 # Email configuration using authenticated SMTP
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = os.environ["DJANGO_EMAIL_HOST"]
+EMAIL_HOST = os.environ.get("DJANGO_EMAIL_HOST", "")
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_USE_SSL = False
-EMAIL_HOST_USER = os.environ["DJANGO_EMAIL_HOST_USER"]
-EMAIL_HOST_PASSWORD = os.environ["DJANGO_EMAIL_HOST_PASSWORD"]
+EMAIL_HOST_USER = os.environ.get("DJANGO_EMAIL_HOST_USER", "")
+EMAIL_HOST_PASSWORD = os.environ.get("DJANGO_EMAIL_HOST_PASSWORD", "")
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 
@@ -157,7 +155,7 @@ LOGGING = {
         'file': {
             'level': 'INFO',
             'class': 'logging.FileHandler',
-            'filename': os.environ["DJANGO_LOG_FILE"],
+            'filename': os.environ.get("DJANGO_LOG_FILE", os.path.join(BASE_DIR, "log.txt")),
             'formatter': 'verbose'
         },
         'mail_admins': {
