@@ -1,11 +1,21 @@
 from django.apps import AppConfig
+import os
+import threading
+
+_watcher_started = False  # Global module-level flag
 
 class MainConfig(AppConfig):
     name = 'main'
-    _watcher_started = False
 
     def ready(self):
-        if not MainConfig._watcher_started:
+        global _watcher_started
+        if not _watcher_started:
             from main.email_watcher import start_background_email_watcher
-            start_background_email_watcher()
-            MainConfig._watcher_started = True
+
+            try:
+                start_background_email_watcher()
+                print("[✓] Email watcher thread started")
+            except Exception as e:
+                print(f"[✗] Email watcher failed to start: {e}")
+
+            _watcher_started = True

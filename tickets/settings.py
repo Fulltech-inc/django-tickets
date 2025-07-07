@@ -32,6 +32,7 @@ if ENV == "production" and not ALLOWED_HOSTS:
 # Application definition
 
 INSTALLED_APPS = (
+    'main.apps.MainConfig',  # Ensure the app is loaded with its config
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
