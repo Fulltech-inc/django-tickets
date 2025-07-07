@@ -1,5 +1,5 @@
 $env:DJANGO_SECRET_KEY = "this-is-temporary-and-insecure"
-$env:DJANGO_PRODUCTION_DOMAIN = "pinesofttechnologies.co.za"
+$env:DJANGO_PRODUCTION_DOMAIN = "5.189.181.199:8000"
 
 # log file
 $env:DJANGO_LOG_FILE = "C:\Users\SPENCER\Documents\GitHub\django-tickets\log.txt"
