@@ -4,11 +4,10 @@ export ENV="production"
 
 export DJANGO_PRODUCTION_DOMAIN="5.189.181.199"
 
-export DJANGO_LOG_FILE="C:\Users\SPENCER\Documents\GitHub\django-tickets\log.txt"
+export DJANGO_LOG_FILE="/opt/myproject/myproject/django-tickets/logs/log.txt"
+export DJANGO_STATIC_ROOT="/opt/myproject/myproject/django-tickets/static"
+export DJANGO_MEDIA_ROOT="/opt/myproject/myproject/django-tickets/media"
 
-export DJANGO_STATIC_ROOT="C:\Users\SPENCER\Documents\GitHub\django-tickets\staticfiles"
-
-export DJANGO_MEDIA_ROOT="C:\Users\SPENCER\Documents\GitHub\django-tickets\media"
 
 export DJANGO_ADMIN_NAME="Spencer"
 export DJANGO_ADMIN_EMAIL="spencertasatech@gmail.com"
