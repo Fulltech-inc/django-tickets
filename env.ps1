@@ -1,6 +1,6 @@
 $env:DJANGO_SECRET_KEY = "this-is-temporary-and-insecure"
 $env:DJANGO_ENV = ""
-$env:DJANGO_PRODUCTION_DOMAIN = "5.189.181.199"
+$env:DJANGO_ALLOWED_HOSTS = "5.189.181.199"
 
 # log file
 $env:DJANGO_LOG_FILE = "C:\Users\SPENCER\Documents\GitHub\django-tickets\log.txt"
