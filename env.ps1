@@ -1,4 +1,5 @@
 $env:DJANGO_SECRET_KEY = "this-is-temporary-and-insecure"
+$env:ENV = "production"
 $env:DJANGO_PRODUCTION_DOMAIN = "5.189.181.199"
 
 # log file

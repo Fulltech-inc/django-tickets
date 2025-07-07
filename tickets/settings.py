@@ -8,14 +8,25 @@ BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "dev-secret-key")
 
-if socket.gethostname() == os.environ["DJANGO_PRODUCTION_DOMAIN"]:
+ENV = os.environ.get("DJANGO_ENV", "development").lower()
+
+# Read ALLOWED_HOSTS as a comma-separated string from env
+raw_hosts = os.environ.get("DJANGO_ALLOWED_HOSTS", "")
+ALLOWED_HOSTS = [host.strip() for host in raw_hosts.split(",") if host.strip()]
+
+if ENV == "production":
     DEBUG = False
-    ALLOWED_HOSTS = ['*']
-    # SSL/HTTPS
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
 else:
     DEBUG = True
+    # Allow wildcard in development
+    if not ALLOWED_HOSTS:
+        ALLOWED_HOSTS = ["*"]
+
+# ✅ Safety check: ensure it's set in production
+if ENV == "production" and not ALLOWED_HOSTS:
+    raise Exception("DJANGO_ALLOWED_HOSTS must be set in production environment.")
 
 
 # Application definition
