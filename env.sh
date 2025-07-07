@@ -1,6 +1,6 @@
 export DJANGO_SECRET_KEY="this-is-temporary-and-insecure"
 
-export ENV="production"
+export DJANGO_ENV="production"
 
 export DJANGO_PRODUCTION_DOMAIN="5.189.181.199"
 
