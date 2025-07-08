@@ -1,36 +1,37 @@
-"""
-Django settings.py - Fully portable, python-dotenv enabled, environment-based configuration
-Compatible with: Python 3.6+, Django 1.11.29
-"""
+# -*- coding: utf-8 -*-
 
+# Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
 import socket
-from dotenv import load_dotenv
 
-# Load .env file from BASE_DIR
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
-load_dotenv(os.path.join(BASE_DIR, '.env'))
 
-# Basic environment configuration
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "dev-secret-key")
+
 ENV = os.environ.get("DJANGO_ENV", "development").lower()
 
-# Allowed Hosts
+# Read ALLOWED_HOSTS as a comma-separated string from env
 raw_hosts = os.environ.get("DJANGO_ALLOWED_HOSTS", "")
 ALLOWED_HOSTS = [host.strip() for host in raw_hosts.split(",") if host.strip()]
-if ENV == "development" and not ALLOWED_HOSTS:
-    ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
+
+if ENV == "production":
+    DEBUG = False
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+else:
+    DEBUG = True
+    # Allow wildcard in development
+    if not ALLOWED_HOSTS:
+        ALLOWED_HOSTS = ["*"]
+
+# ✅ Safety check: ensure it's set in production
 if ENV == "production" and not ALLOWED_HOSTS:
     raise Exception("DJANGO_ALLOWED_HOSTS must be set in production environment.")
 
-# Debug mode toggle
-DEBUG = ENV != "production"
-SESSION_COOKIE_SECURE = not DEBUG
-CSRF_COOKIE_SECURE = not DEBUG
+# Application definition
 
-# Installed apps
 INSTALLED_APPS = (
-    'main.apps.MainConfig',
+    'main.apps.MainConfig',  # Ensure the app is loaded with its config
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -40,11 +41,10 @@ INSTALLED_APPS = (
     'crispy_forms',
 )
 
-# Templates
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'templates')],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],  # your templates directory
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -57,7 +57,6 @@ TEMPLATES = [
     },
 ]
 
-# Middleware
 MIDDLEWARE_CLASSES = (
     "whitenoise.middleware.WhiteNoiseMiddleware",
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -70,9 +69,11 @@ MIDDLEWARE_CLASSES = (
 )
 
 ROOT_URLCONF = 'tickets.urls'
+
 WSGI_APPLICATION = 'tickets.wsgi.application'
 
 # Database
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -81,42 +82,46 @@ DATABASES = {
 }
 
 # Internationalization
+
 LANGUAGE_CODE = 'en-us'
+
 TIME_ZONE = 'Europe/Berlin'
+
 USE_I18N = True
+
 USE_L10N = True
+
 USE_TZ = True
 
-# Helper to resolve environment paths relative to BASE_DIR
-def resolve_env_path(key, default_filename):
-    path = os.environ.get(key, default_filename)
-    if not os.path.isabs(path):
-        path = os.path.join(BASE_DIR, path)
-    return path
-
-# Static & media files
+# ✅ STATIC FILES FIXED SECTION
 STATIC_URL = '/static/'
-STATIC_ROOT = resolve_env_path("DJANGO_STATIC_ROOT", "staticfiles")
-MEDIA_URL = '/media/'
-MEDIA_ROOT = resolve_env_path("DJANGO_MEDIA_ROOT", "media")
-STATICFILES_DIRS = (
-    os.path.join(BASE_DIR, "static"),
-)
 
-# Authentication redirects
+# STATIC_ROOT is where collectstatic will copy files to for production
+STATIC_ROOT = os.path.join(BASE_DIR, os.environ.get("DJANGO_STATIC_ROOT", "staticfiles"))
+
+# STATICFILES_DIRS is where Django will look for source static assets
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, os.environ.get("DJANGO_MEDIA_ROOT", "media"))
+
+# On login do not redirect to "/accounts/profile/" but "/inbox/"
 LOGIN_REDIRECT_URL = "/inbox/"
+
+# in urls.py the function "logout_then_login" is used to log out
+# changing the default value from "/accounts/login/" to "/"
 LOGIN_URL = "/"
 
 # Django Crispy Forms
 CRISPY_TEMPLATE_PACK = 'bootstrap3'
 
-# Admin contacts
+# Define who gets code error notifications.
 admin_name = os.environ.get("DJANGO_ADMIN_NAME")
 admin_email = os.environ.get("DJANGO_ADMIN_EMAIL")
 ADMINS = [(admin_name, admin_email)] if admin_name and admin_email else []
-MANAGERS = ADMINS
+MANAGERS = [(admin_name, admin_email)] if admin_name and admin_email else []
 
-# Email settings
+# Email configuration using authenticated SMTP
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = os.environ.get("DJANGO_EMAIL_HOST", "")
 EMAIL_PORT = 587
@@ -126,14 +131,16 @@ EMAIL_HOST_USER = os.environ.get("DJANGO_EMAIL_HOST_USER", "")
 EMAIL_HOST_PASSWORD = os.environ.get("DJANGO_EMAIL_HOST_PASSWORD", "")
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
+log_file_path = os.environ.get("DJANGO_LOG_FILE", os.path.join(BASE_DIR, "log.txt"))
+
 # Logging
-log_file_path = resolve_env_path("DJANGO_LOG_FILE", "log.txt")
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
     'formatters': {
         'verbose': {
-            'format': "[%(asctime)s] %(levelname)s [%(name)s:%(lineno)s] %(message)s",
+            'format': "[%(asctime)s] %(levelname)s \
+                       [%(name)s:%(lineno)s] %(message)s",
             'datefmt': "%d/%b/%Y %H:%M:%S"
         },
         'simple': {
