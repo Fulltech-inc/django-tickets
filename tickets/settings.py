@@ -136,9 +136,6 @@ EMAIL_HOST_USER = os.environ.get("DJANGO_EMAIL_HOST_USER", "")
 EMAIL_HOST_PASSWORD = os.environ.get("DJANGO_EMAIL_HOST_PASSWORD", "")
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
-log_file_path = os.environ.get("DJANGO_LOG_FILE")
-if not log_file_path:
-    log_file_path = os.path.join(BASE_DIR, "log.txt")
 
 # Logging
 LOGGING = {
@@ -158,7 +155,7 @@ LOGGING = {
         'file': {
             'level': 'INFO',
             'class': 'logging.FileHandler',
-            'filename': log_file_path,
+            'filename': os.environ.get("DJANGO_LOG_FILE", os.path.join(BASE_DIR, "log.txt")),
             'formatter': 'verbose'
         },
         'mail_admins': {
