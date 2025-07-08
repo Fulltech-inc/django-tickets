@@ -1,6 +1,6 @@
 export DJANGO_SECRET_KEY="this-is-temporary-and-insecure"
 export DJANGO_ENV="production"
-export DJANGO_ALLOWED_HOSTS="5.189.181.199, 127.0.0.1, localhost"
+export DJANGO_ALLOWED_HOSTS="5.189.181.199"
 
 export DJANGO_LOG_FILE="/opt/myproject/myproject/django-tickets/log.txt"
 
