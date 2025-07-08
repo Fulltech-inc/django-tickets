@@ -1,4 +1,6 @@
 import os
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "tickets.settings")  # or your project name
+
 from dotenv import load_dotenv
 import time
 from main.email_watcher import start_background_email_watcher
@@ -9,7 +11,7 @@ load_dotenv(os.path.join(os.path.dirname(os.path.dirname(__file__)), '.env'))
 if __name__ == "__main__":
     try:
         start_background_email_watcher()
-        print("[✓] Email watcher thread started by watcher_runner.py")
+        print("[✓] Email watcher thread started")
     except Exception as e:
         print(f"[✗] Failed to start email watcher: {e}")
         raise e
@@ -20,4 +22,3 @@ if __name__ == "__main__":
             time.sleep(60)
     except KeyboardInterrupt:
         print("Watcher stopped manually.")
-
