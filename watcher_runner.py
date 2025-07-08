@@ -1,8 +1,14 @@
 import os
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "tickets.settings")  # or your project name
-
+import django
 from dotenv import load_dotenv
 import time
+
+# Set DJANGO_SETTINGS_MODULE
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "tickets.settings")  # Adjust if your project structure is different
+
+# Initialize Django
+django.setup()
+
 from main.email_watcher import start_background_email_watcher
 
 # Load .env file from project root
