@@ -2,7 +2,7 @@ export DJANGO_SECRET_KEY="this-is-temporary-and-insecure"
 export DJANGO_ENV="production"
 export DJANGO_ALLOWED_HOSTS="5.189.181.199"
 
-export DJANGO_LOG_FILE="/opt/myproject/myproject/django-tickets/log.txt"
+export DJANGO_LOG_FILE=/opt/myproject/myproject/django-tickets/log.txt
 
 export DJANGO_STATIC_ROOT="/opt/myproject/myproject/django-tickets/static"
 export DJANGO_MEDIA_ROOT="/opt/myproject/myproject/django-tickets/media"
