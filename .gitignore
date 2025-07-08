@@ -26,3 +26,7 @@ db.sqlite3
 
 # static root folder for local deployments
 static_root
+
+# log files
+# This is a temporary log file, it should not be in the repo.
+log.txt
