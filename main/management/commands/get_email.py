@@ -40,11 +40,9 @@ import re
 import os
 from email.header import decode_header
 from email.utils import parseaddr, collapse_rfc2231_value
-from optparse import make_option
 from email_reply_parser import EmailReplyParser
 from django.core.files.base import ContentFile
 from django.core.management.base import BaseCommand
-
 from django.contrib.auth.models import User
 
 try:
@@ -56,18 +54,15 @@ from main.models import Ticket, Attachment, FollowUp
 
 
 class Command(BaseCommand):
-    def __init__(self):
-        BaseCommand.__init__(self)
-
-        self.option_list += (
-            make_option(
-                '--quiet', '-q',
-                default=False,
-                action='store_true',
-                help='Hide details about each message as they are processed.'),
-            )
-
     help = 'Process email inbox and create tickets.'
+
+    def add_arguments(self, parser):
+        parser.add_argument(
+            '-q', '--quiet',
+            action='store_true',
+            default=False,
+            help='Hide details about each message as they are processed.'
+        )
 
     def handle(self, *args, **options):
         quiet = options.get('quiet', False)
@@ -76,29 +71,43 @@ class Command(BaseCommand):
 
 def process_inbox(quiet=False):
     """
-    Process IMAP inbox
+    Connects to IMAP inbox and processes all new emails
     """
-    server = imaplib.IMAP4_SSL(os.environ["DJANGO_TICKET_INBOX_SERVER"], 993)
-    server.login(os.environ["DJANGO_TICKET_INBOX_USER"], os.environ["DJANGO_TICKET_INBOX_PASSWORD"])
+    # Connect to IMAP server with SSL on port 993 (standard)
+    server = imaplib.IMAP4_SSL(
+        os.environ["DJANGO_TICKET_INBOX_SERVER"], 993
+    )
+    server.login(
+        os.environ["DJANGO_TICKET_INBOX_USER"],
+        os.environ["DJANGO_TICKET_INBOX_PASSWORD"]
+    )
     server.select("INBOX")
+
+    # Search for all emails not marked deleted
     status, data = server.search(None, 'NOT', 'DELETED')
     if data:
         msgnums = data[0].split()
         for num in msgnums:
-            status, data = server.fetch(num, '(RFC822)')
-            ticket = ticket_from_message(message=data[0][1], quiet=quiet)
-            if ticket:
-                server.store(num, '+FLAGS', '\\Deleted')
+            status, msg_data = server.fetch(num, '(RFC822)')
+            if status != 'OK':
+                continue
+            raw_email = msg_data[0][1]
+            ticket_or_followup = ticket_from_message(message_bytes=raw_email, quiet=quiet)
+            if ticket_or_followup and not quiet:
+                print(f"Processed message for ticket/followup: {ticket_or_followup}")
+            # Mark message deleted after processing
+            server.store(num, '+FLAGS', '\\Deleted')
+
     server.expunge()
     server.close()
     server.logout()
 
 
-def decodeUnknown(value, charset='utf-8'):
+def decode_unknown(value, charset='utf-8'):
     if isinstance(value, bytes):
         try:
             return value.decode(charset, errors='ignore')
-        except:
+        except Exception:
             return value.decode('iso8859-1', errors='ignore')
     elif isinstance(value, str):
         return value
@@ -106,35 +115,32 @@ def decodeUnknown(value, charset='utf-8'):
         return str(value)
 
 
-
 def decode_mail_headers(string):
     decoded = decode_header(string)
     return u' '.join([
-        msg if isinstance(msg, str) else msg.decode(charset or 'utf-8', errors='ignore')
-        for msg, charset in decoded
+        part if isinstance(part, str) else part.decode(charset or 'utf-8', errors='ignore')
+        for part, charset in decoded
     ])
 
 
-
-def ticket_from_message(message, quiet):
+def ticket_from_message(message_bytes, quiet):
     """
     Create a ticket or a followup (if ticket id in subject)
     """
-    msg = message
-    message = email.message_from_bytes(msg)
+    message = email.message_from_bytes(message_bytes)
+
     subject = message.get('subject', 'Created from e-mail')
-    subject = decode_mail_headers(decodeUnknown(message.get_charset(), subject))
-    sender = message.get('from', ('Unknown Sender'))
-    sender = decode_mail_headers(decodeUnknown(message.get_charset(), sender))
+    subject = decode_mail_headers(subject)
+
+    sender = message.get('from', 'Unknown Sender')
+    sender = decode_mail_headers(sender)
     sender_email = parseaddr(sender)[1]
+
     body_plain, body_html = '', ''
 
-    matchobj = re.match(r".*\["+"-(?P<id>\d+)\]", subject)
-    if matchobj:
-        # This is a reply or forward.
-        ticket = matchobj.group('id')
-    else:
-        ticket = None
+    # Match ticket ID pattern in subject (e.g., "[#1234]")
+    matchobj = re.search(r"\[#(\d+)\]", subject)
+    ticket_id = int(matchobj.group(1)) if matchobj else None
 
     counter = 0
     files = []
@@ -147,28 +153,27 @@ def ticket_from_message(message, quiet):
         if name:
             name = collapse_rfc2231_value(name)
 
-        if part.get_content_maintype() == 'text' and name == None:
+        if part.get_content_maintype() == 'text' and name is None:
             if part.get_content_subtype() == 'plain':
-                body_plain = EmailReplyParser.parse_reply(decodeUnknown(part.get_content_charset(), part.get_payload(decode=True)))
+                charset = part.get_content_charset() or 'utf-8'
+                payload = part.get_payload(decode=True)
+                body_plain = EmailReplyParser.parse_reply(payload.decode(charset, errors='ignore'))
             else:
                 body_html = part.get_payload(decode=True)
         else:
             if not name:
-                ext = mimetypes.guess_extension(part.get_content_type())
-                name = "part-%i%s" % (counter, ext)
+                ext = mimetypes.guess_extension(part.get_content_type()) or ''
+                name = f"part-{counter}{ext}"
 
             files.append({
                 'filename': name,
                 'content': part.get_payload(decode=True),
-                'type': part.get_content_type()},
-            )
+                'type': part.get_content_type(),
+            })
 
         counter += 1
 
-    if body_plain:
-        body = body_plain
-    else:
-        body = 'No plain-text email body available. Please see attachment email_html_body.html.'
+    body = body_plain or 'No plain-text email body available. Please see attachment email_html_body.html.'
 
     if body_html:
         files.append({
@@ -179,130 +184,107 @@ def ticket_from_message(message, quiet):
 
     now = timezone.now()
 
-    if ticket:
+    if ticket_id:
         try:
-            t = Ticket.objects.get(id=ticket)
+            t = Ticket.objects.get(id=ticket_id)
             new = False
         except Ticket.DoesNotExist:
-            ticket = None
+            ticket_id = None
 
-    if ticket == None:
-
-        # set owner depending on sender_email
-        # list of all email addresses from the user model
+    if ticket_id is None:
         users = User.objects.all()
-        email_addresses = []
-        for user in users:
-            email_addresses.append(user.email)
+        email_addresses = [user.email for user in users]
 
-        ############################################################
-        # if ticket id in subject => new followup instead of new ticket
+        # Check if subject contains valid ticket ID to create followup
         tickets = Ticket.objects.all()
-        ticket_ids = []
-        for ticket in tickets:
-            ticket_ids.append(ticket.id)
+        ticket_ids = [t.id for t in tickets]
 
-        # extract id from subject
-        subject_id = re.search(r'\[#(\d*)\]\s.*', subject)
-        try:
-            subject_id = subject_id.group(1)
-        except:
-            subject_id = "0000"  # no valid id
+        subject_id_match = re.search(r'\[#(\d+)\]', subject)
+        subject_id = int(subject_id_match.group(1)) if subject_id_match else None
 
-        # if there was an ID in the subject, create followup
-        if int(subject_id) in ticket_ids:
-
+        if subject_id in ticket_ids:
+            # Create followup
             if sender_email in email_addresses:
                 f = FollowUp(
-                           title=subject,
-                           created=now,
-                           text=body,
-                           ticket=Ticket.objects.get(id=subject_id),
-                           user=User.objects.get(email=sender_email),
+                    title=subject,
+                    created=now,
+                    text=body,
+                    ticket=Ticket.objects.get(id=subject_id),
+                    user=User.objects.get(email=sender_email),
                 )
             else:
                 f = FollowUp(
-                           title=subject,
-                           created=now,
-                           text=body,
-                           ticket=Ticket.objects.get(id=subject_id),
+                    title=subject,
+                    created=now,
+                    text=body,
+                    ticket=Ticket.objects.get(id=subject_id),
                 )
-
             f.save()
-
-        # if no ID in the subject, create ticket
+            if not quiet:
+                print(f"Created followup for ticket #{subject_id}")
+            return f
         else:
-
-            # if known sender, set also the field owner
+            # Create new ticket
             if sender_email in email_addresses:
                 t = Ticket(
-                           title=subject,
-                           status="TODO",
-                           created=now,
-                           description=body,
-                           owner=User.objects.get(email=sender_email),
+                    title=subject,
+                    status="TODO",
+                    created=now,
+                    description=body,
+                    owner=User.objects.get(email=sender_email),
                 )
-            # if unknown sender, skip the field owner
             else:
                 t = Ticket(
-                           title=subject,
-                           status="TODO",
-                           created=now,
-                           description=body,
+                    title=subject,
+                    status="TODO",
+                    created=now,
+                    description=body,
                 )
-
             t.save()
 
             from django.core.mail import send_mail
-            notification_subject = "[#" + str(t.id) + "] New ticket created"
-            notification_body = "Hi,\n\na new ticket was created: http://localhost:8000/ticket/" \
-                                + str(t.id) + "/"
-            send_mail(notification_subject, notification_body, os.environ["DJANGO_TICKET_EMAIL_NOTIFICATIONS_FROM"],
-                            [os.environ["DJANGO_TICKET_EMAIL_NOTIFICATIONS_TO"]], fail_silently=False)
+            notification_subject = f"[#{t.id}] New ticket created"
+            notification_body = f"Hi,\n\na new ticket was created: http://localhost:8000/ticket/{t.id}/"
+            send_mail(
+                notification_subject,
+                notification_body,
+                os.environ["DJANGO_TICKET_EMAIL_NOTIFICATIONS_FROM"],
+                [os.environ["DJANGO_TICKET_EMAIL_NOTIFICATIONS_TO"]],
+                fail_silently=False,
+            )
+            if not quiet:
+                print(f"Created new ticket #{t.id}")
 
-        ############################################################
-
-        new = True
-        update = ''
+            return t
 
     elif t.status == Ticket.CLOSED_STATUS:
         t.status = Ticket.REOPENED_STATUS
         t.save()
+        if not quiet:
+            print(f"Reopened ticket #{t.id}")
 
-    # files of followups should be assigned to the corresponding ticket
+    # Save attachments
     for file in files:
-
         if file['content']:
-
-            filename = file['filename'].replace(' ', '_').encode('ascii', 'replace').decode('ascii')
-            filename = re.sub('[^a-zA-Z0-9._-]+', '', filename)
-
-            # if followup
-            if int(subject_id) in ticket_ids:
-                a = Attachment(
-                           ticket=Ticket.objects.get(id=subject_id),
-                           filename=filename,
-                           #mime_type=file['type'],
-                           #size=len(file['content']),
+            filename = re.sub(r'[^a-zA-Z0-9._-]+', '', file['filename'].replace(' ', '_').encode('ascii', 'replace').decode('ascii'))
+            if ticket_id:
+                attachment = Attachment(
+                    ticket=Ticket.objects.get(id=ticket_id),
+                    filename=filename,
+                    # mime_type=file['type'],
+                    # size=len(file['content']),
                 )
-
-            # if new ticket
             else:
-                a = Attachment(
-                           ticket=t,
-                           filename=filename,
-                           #mime_type=file['type'],
-                           #size=len(file['content']),
+                attachment = Attachment(
+                    ticket=t,
+                    filename=filename,
+                    # mime_type=file['type'],
+                    # size=len(file['content']),
                 )
-
-            a.file.save(filename, ContentFile(file['content']), save=False)
-            a.save()
+            attachment.file.save(filename, ContentFile(file['content']), save=False)
+            attachment.save()
 
             if not quiet:
-                print(" - %s" % filename)
+                print(f" - Saved attachment: {filename}")
 
-
-    if int(subject_id) in ticket_ids:
-        return f
-    else:
-        return t
+    return t

@@ -7,10 +7,9 @@ from .models import Ticket, FollowUp, Attachment
 
 
 class UserSettingsForm(forms.ModelForm):
-
     class Meta:
         model = User
-        fields = ('first_name', 'last_name', 'email',)
+        fields = ('first_name', 'last_name', 'email')
 
 
 class TicketCreateForm(forms.ModelForm):
@@ -27,7 +26,6 @@ class TicketEditForm(forms.ModelForm):
 
 
 class FollowupForm(forms.ModelForm):
-
     class Meta:
         model = FollowUp
         fields = ('ticket', 'title', 'text', 'user')

@@ -20,7 +20,7 @@
   </ul>
 </div>
 
-      <div class="page-header"><h1>Ticket #{{ ticket.id }}</h1></div>
+<div class="page-header"><h1>Ticket #{{ ticket.id }}</h1></div>
 
 <div class="row">
     <div class="col-lg-8">
@@ -29,40 +29,40 @@
        .description { background: #EEE; }
       </style>
 
-<table class="table table-bordered">
-  <tr>
-    <td class="description"><b>Status</b></td>
-    <td>{% if ticket.status == "TODO" %}<span class="label label-danger">TODO</span>{% elif ticket.status == "DONE" %}<span class="label label-success">DONE</span>{% elif ticket.status == "WAITING" %}<span class="label label-warning">WAITING</span>{% elif ticket.status == "IN PROGRESS" %}<span class="label label-default">IN PROGRESS</span>{% endif %}</td>
-  </tr>
-  <tr>
-    <td class="description"><b>Assigned to</b></td>
-    <td>{% if ticket.assigned_to %}{{ ticket.assigned_to.first_name }} {{ ticket.assigned_to.last_name }}{% else %}---{% endif %}</td>
-  </tr>
-  <tr>
-    <td class="description"><b>Owner</b></td>
-    <td>{{ ticket.owner.first_name }} {{ ticket.owner.last_name }}</td>
-  </tr>
-  <tr>
-    <td width="180px" class="description"><b>Title</b></td>
-    <td>{{ ticket.title }}</td>
-  </tr>
-  <tr>
-    <td class="description"><b>Description</b></td>
-    <td>{{ ticket.description}}</td>
-  </tr>
-</table>
+      <table class="table table-bordered">
+        <tr>
+          <td class="description"><b>Status</b></td>
+          <td>{% if ticket.status == "TODO" %}<span class="label label-danger">TODO</span>{% elif ticket.status == "DONE" %}<span class="label label-success">DONE</span>{% elif ticket.status == "WAITING" %}<span class="label label-warning">WAITING</span>{% elif ticket.status == "IN PROGRESS" %}<span class="label label-default">IN PROGRESS</span>{% endif %}</td>
+        </tr>
+        <tr>
+          <td class="description"><b>Assigned to</b></td>
+          <td>{% if ticket.assigned_to %}{{ ticket.assigned_to.first_name }} {{ ticket.assigned_to.last_name }}{% else %}---{% endif %}</td>
+        </tr>
+        <tr>
+          <td class="description"><b>Owner</b></td>
+          <td>{{ ticket.owner.first_name }} {{ ticket.owner.last_name }}</td>
+        </tr>
+        <tr>
+          <td width="180px" class="description"><b>Title</b></td>
+          <td>{{ ticket.title }}</td>
+        </tr>
+        <tr>
+          <td class="description"><b>Description</b></td>
+          <td>{{ ticket.description }}</td>
+        </tr>
+      </table>
 
     </div>
     <div class="col-lg-4">
 
-{% if attachments %}
-<h2>Attachments</h2>
-<ul>
-    {% for attachment in attachments %}
-    <li><a href="/media/tickets/{{ ticket.id }}/{{ attachment.filename }}">{{ attachment.filename }}</a></li>
-    {% endfor %}
-</ul>
-{% endif %}
+      {% if attachments %}
+      <h2>Attachments</h2>
+      <ul>
+          {% for attachment in attachments %}
+          <li><a href="/media/tickets/{{ ticket.id }}/{{ attachment.filename }}">{{ attachment.filename }}</a></li>
+          {% endfor %}
+      </ul>
+      {% endif %}
 
     </div><!-- Ende column -->
 </div><!-- Ende row -->
@@ -76,7 +76,7 @@
 <script type="text/javascript" charset="utf-8">
     $(document).ready(function() {
         $('#followups').dataTable();
-    } );
+    });
 </script>
 
 <h2>Followups</h2>
@@ -108,6 +108,4 @@
     <p>no followup so far...</p>
 {% endif %}
 
-
 {% endblock %}
-

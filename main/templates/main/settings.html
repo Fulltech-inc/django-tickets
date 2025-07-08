@@ -8,23 +8,15 @@
 
 {% block content %}
 {% load staticfiles %}
+{% load crispy_forms_tags %}
 
 <div class="row" style="margin-top: 30px;">
     <div class="col-md-6">
-
-        {% load crispy_forms_tags %}
-
         <form action="" method="post">
             {% csrf_token %}
-
             {{ form_user|crispy }}
-      <br/>
-    </div>
-</div>
-
-<div class="row">
-    <div class="col-md-12">
-        <input type="submit" value="Save Settings" class="btn btn-primary" />
+            <br/>
+            <input type="submit" value="Save Settings" class="btn btn-primary" />
         </form>
     </div>
 </div>

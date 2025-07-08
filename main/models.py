@@ -2,8 +2,8 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
 from django.core.files.storage import default_storage, FileSystemStorage
-import os
 from django.conf import settings
+import os
 
 
 class Ticket(models.Model):
@@ -20,7 +20,8 @@ class Ticket(models.Model):
         related_name='tickets_owned',
         blank=True,
         null=True,
-        verbose_name='Owner'
+        verbose_name='Owner',
+        on_delete=models.SET_NULL
     )
     description = models.TextField('Description', blank=True, null=True)
     status = models.CharField(
@@ -35,7 +36,8 @@ class Ticket(models.Model):
         related_name='tickets_waiting_for',
         blank=True,
         null=True,
-        verbose_name='Waiting For'
+        verbose_name='Waiting For',
+        on_delete=models.SET_NULL
     )
     closed_date = models.DateTimeField(blank=True, null=True)
     assigned_to = models.ForeignKey(
@@ -43,7 +45,8 @@ class Ticket(models.Model):
         related_name='tickets_assigned_to',
         blank=True,
         null=True,
-        verbose_name='Assigned to'
+        verbose_name='Assigned to',
+        on_delete=models.SET_NULL
     )
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)

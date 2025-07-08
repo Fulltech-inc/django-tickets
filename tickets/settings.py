@@ -1,15 +1,15 @@
 # -*- coding: utf-8 -*-
 
-# Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
 
+# Base directory of the project
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "dev-secret-key")
 
 ENV = os.environ.get("DJANGO_ENV", "development").lower()
 
-# Read ALLOWED_HOSTS as a comma-separated string from env
+# Allowed hosts from environment
 raw_hosts = os.environ.get("DJANGO_ALLOWED_HOSTS", "")
 ALLOWED_HOSTS = [host.strip() for host in raw_hosts.split(",") if host.strip()]
 
@@ -19,18 +19,18 @@ if ENV == "production":
     CSRF_COOKIE_SECURE = True
 else:
     DEBUG = True
-    # Allow wildcard in development
     if not ALLOWED_HOSTS:
         ALLOWED_HOSTS = ["*"]
 
-# ✅ Safety check: ensure it's set in production
 if ENV == "production" and not ALLOWED_HOSTS:
     raise Exception("DJANGO_ALLOWED_HOSTS must be set in production environment.")
 
-# Application definition
+# Use BigAutoField as the default primary key type everywhere unless overridden
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# Application definition
 INSTALLED_APPS = (
-    'main.apps.MainConfig',  # Ensure the app is loaded with its config
+    'main.apps.MainConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -43,7 +43,7 @@ INSTALLED_APPS = (
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'templates')],  # your templates directory
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -56,23 +56,22 @@ TEMPLATES = [
     },
 ]
 
-MIDDLEWARE_CLASSES = (
+MIDDLEWARE = [
     "whitenoise.middleware.WhiteNoiseMiddleware",
+    'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-)
+]
 
 ROOT_URLCONF = 'tickets.urls'
 
 WSGI_APPLICATION = 'tickets.wsgi.application'
 
-# Database
-
+# Database configuration
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -81,46 +80,35 @@ DATABASES = {
 }
 
 # Internationalization
-
 LANGUAGE_CODE = 'en-us'
-
 TIME_ZONE = 'Europe/Berlin'
-
 USE_I18N = True
-
+USE_TZ = True
+# USE_L10N is deprecated in Django 5.0+ but harmless if left in
 USE_L10N = True
 
-USE_TZ = True
-
-# ✅ STATIC FILES FIXED SECTION
+# Static and media files
 STATIC_URL = '/static/'
-
-# STATIC_ROOT is where collectstatic will copy files to for production
 STATIC_ROOT = os.path.join(BASE_DIR, os.environ.get("DJANGO_STATIC_ROOT", "staticfiles"))
-
-# STATICFILES_DIRS is where Django will look for source static assets
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, os.environ.get("DJANGO_MEDIA_ROOT", "media"))
 
-# On login do not redirect to "/accounts/profile/" but "/inbox/"
+# Auth settings
 LOGIN_REDIRECT_URL = "/inbox/"
-
-# in urls.py the function "logout_then_login" is used to log out
-# changing the default value from "/accounts/login/" to "/"
 LOGIN_URL = "/"
 
 # Django Crispy Forms
 CRISPY_TEMPLATE_PACK = 'bootstrap3'
 
-# Define who gets code error notifications.
+# Admins & Managers
 admin_name = os.environ.get("DJANGO_ADMIN_NAME")
 admin_email = os.environ.get("DJANGO_ADMIN_EMAIL")
 ADMINS = [(admin_name, admin_email)] if admin_name and admin_email else []
 MANAGERS = [(admin_name, admin_email)] if admin_name and admin_email else []
 
-# Email configuration using authenticated SMTP
+# Email configuration
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = os.environ.get("DJANGO_EMAIL_HOST", "")
 EMAIL_PORT = 587
@@ -130,16 +118,15 @@ EMAIL_HOST_USER = os.environ.get("DJANGO_EMAIL_HOST_USER", "")
 EMAIL_HOST_PASSWORD = os.environ.get("DJANGO_EMAIL_HOST_PASSWORD", "")
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
+# Logging configuration
 log_file_path = os.environ.get("DJANGO_LOG_FILE", os.path.join(BASE_DIR, "log.txt"))
 
-# Logging
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
     'formatters': {
         'verbose': {
-            'format': "[%(asctime)s] %(levelname)s \
-                       [%(name)s:%(lineno)s] %(message)s",
+            'format': "[%(asctime)s] %(levelname)s [%(name)s:%(lineno)s] %(message)s",
             'datefmt': "%d/%b/%Y %H:%M:%S"
         },
         'simple': {

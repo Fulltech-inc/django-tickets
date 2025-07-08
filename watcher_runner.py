@@ -20,3 +20,4 @@ if __name__ == "__main__":
             time.sleep(60)
     except KeyboardInterrupt:
         print("Watcher stopped manually.")
+

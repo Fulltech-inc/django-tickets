@@ -14,9 +14,8 @@
 
     <form enctype="multipart/form-data" method="post" action="">
         {% csrf_token %}
-        {{ form | crispy }}
+        {{ form|crispy }}
         <input class="btn btn-primary" type="submit" value="Save Attachment" />
     </form>
 
 {% endblock %}
-
