@@ -155,7 +155,7 @@ LOGGING = {
         'file': {
             'level': 'INFO',
             'class': 'logging.FileHandler',
-            'filename': os.environ.get("DJANGO_LOG_FILE", os.path.join(BASE_DIR, "log.txt")),
+            'filename': os.environ.get("DJANGO_LOG_FILE", "/default/path/log.txt"),
             'formatter': 'verbose'
         },
         'mail_admins': {
