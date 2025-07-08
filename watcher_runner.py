@@ -9,7 +9,7 @@ load_dotenv(os.path.join(os.path.dirname(os.path.dirname(__file__)), '.env'))
 if __name__ == "__main__":
     try:
         start_background_email_watcher()
-        print("[✓] Email watcher thread started")
+        print("[✓] Email watcher thread started by watcher_runner.py")
     except Exception as e:
         print(f"[✗] Failed to start email watcher: {e}")
         raise e
