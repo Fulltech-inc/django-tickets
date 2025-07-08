@@ -1,10 +1,4 @@
 from django.apps import AppConfig
-from dotenv import load_dotenv
-import os
-
-# Load .env file from the project root
-load_dotenv(os.path.join(os.path.dirname(os.path.dirname(__file__)), '.env'))
-
 
 _watcher_started = False  # Global module-level flag
 
