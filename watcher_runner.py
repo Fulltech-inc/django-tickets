@@ -1,14 +1,11 @@
-from dotenv import load_dotenv
 import os
-import sys
 import django
+from dotenv import load_dotenv
 import time
 
-env_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), '.env')
-loaded = load_dotenv(env_path)
-print(f"[DEBUG] .env loaded: {loaded}")
-print(f"[DEBUG] .env path: {env_path}")
-print(f"[DEBUG] DJANGO_TICKET_INBOX_SERVER: {os.getenv('DJANGO_TICKET_INBOX_SERVER')}")
+# Load .env file from project root
+dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
+load_dotenv(dotenv_path)
 
 # Set DJANGO_SETTINGS_MODULE
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "tickets.settings")  # adjust if needed
