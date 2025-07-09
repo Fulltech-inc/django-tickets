@@ -117,19 +117,7 @@ def followup_create_view(request):
             )
 
 
-
-
-
             # Send email notification to the ticket owner
-            # Inside main.views.followup_create_view(request, ticket_id):
-            # ... (your existing view logic) ...
-
-            # Assuming 'ticket', 'notification_subject', 'notification_body' are defined here
-            # Example:
-            # ticket = get_object_or_404(Ticket, id=ticket_id)
-            # notification_subject = "Ticket Update"
-            # notification_body = "Your ticket has been updated."
-
             connection = None
             try:
                 connection = get_connection()
@@ -156,9 +144,6 @@ def followup_create_view(request):
                         connection.close()
                     except Exception:
                         pass # Suppress errors during connection closing if not critical
-
-
-
 
 
             return redirect('inbox')
