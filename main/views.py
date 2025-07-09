@@ -4,7 +4,8 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.models import User
 from django.http import HttpResponseRedirect
 from django.utils import timezone
-from django.core.mail import send_mail
+from django.core.mail import send_mail, EmailMessage, get_connection
+from django.conf import settings
 
 from .models import Ticket, Attachment, FollowUp
 from .forms import UserSettingsForm, TicketCreateForm, TicketEditForm, FollowupForm, AttachmentForm
@@ -115,15 +116,18 @@ def followup_create_view(request):
                 f"Title: {form.cleaned_data['title']}\n\n{form.cleaned_data['text']}"
             )
             # Send email notification to the ticket owner
-            from django.conf import settings
+            connection = get_connection()
+            connection.open()
 
-            send_mail(
+            email = EmailMessage(
                 notification_subject,
                 notification_body,
                 settings.DEFAULT_FROM_EMAIL,
                 [ticket.owner.email],
-                fail_silently=False
+                connection=connection,
             )
+            email.send(fail_silently=False)
+            connection.close()
 
             return redirect('inbox')
     else:
