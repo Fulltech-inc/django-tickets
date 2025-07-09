@@ -114,13 +114,17 @@ def followup_create_view(request):
                 f"(http://localhost:8000/ticket/{ticket.id}/)\n\n"
                 f"Title: {form.cleaned_data['title']}\n\n{form.cleaned_data['text']}"
             )
+            # Send email notification to the ticket owner
+            from django.conf import settings
+
             send_mail(
                 notification_subject,
                 notification_body,
-                'test@test.tld',
+                settings.DEFAULT_FROM_EMAIL,
                 [ticket.owner.email],
                 fail_silently=False
             )
+
             return redirect('inbox')
     else:
         form = FollowupForm(initial={'ticket': request.GET.get('ticket'), 'user': request.user})
