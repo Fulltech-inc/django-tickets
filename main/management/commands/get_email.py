@@ -142,7 +142,7 @@ def ticket_from_message(message, quiet):
         from django.core.mail import send_mail
         send_mail(
             f"[#{t.id}] New ticket created",
-            f"Hi,\n\na new ticket was created: http://localhost:8000/ticket/{t.id}/",
+            f"Hi,\n\na new ticket was created: http://5.189.181.199:8000/ticket/{t.id}/",
             os.environ["DJANGO_TICKET_EMAIL_NOTIFICATIONS_FROM"],
             [os.environ["DJANGO_TICKET_EMAIL_NOTIFICATIONS_TO"]],
             fail_silently=False

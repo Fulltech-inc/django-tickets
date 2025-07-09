@@ -4,9 +4,8 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.models import User
 from django.http import HttpResponseRedirect
 from django.utils import timezone
-from django.core.mail import send_mail, EmailMessage, get_connection
+from django.core.mail import get_connection, EmailMessage
 from django.conf import settings
-
 from .models import Ticket, Attachment, FollowUp
 from .forms import UserSettingsForm, TicketCreateForm, TicketEditForm, FollowupForm, AttachmentForm
 
@@ -112,39 +111,24 @@ def followup_create_view(request):
             notification_subject = f"[#{ticket.id}] New followup"
             notification_body = (
                 f"Hi,\n\nNew followup created for ticket #{ticket.id} "
-                f"(http://localhost:8000/ticket/{ticket.id}/)\n\n"
+                f"(http://{request.get_host()}/ticket/{ticket.id}/)\n\n"
                 f"Title: {form.cleaned_data['title']}\n\n{form.cleaned_data['text']}"
             )
 
+            # Manage email connection manually (production-safe)
+            connection = get_connection(fail_silently=False)
+            connection.open()  # Ensure connection handshake
 
-            # Send email notification to the ticket owner
-            connection = None
-            try:
-                connection = get_connection()
-                connection.open()
-
-                email = EmailMessage(
-                    notification_subject,
-                    notification_body,
-                    settings.DEFAULT_FROM_EMAIL,
-                    [ticket.owner.email],
-                    connection=connection,
-                )
-                email.send(fail_silently=False)
-
-            except Exception as e: # Catch any exception that occurs during email sending
-                # Handle the error gracefully, e.g., log it, show a user-friendly message
-                # print(f"Failed to send email: {e}") # For debugging
-                # You might want to return an error response or flash a message
-                pass # Or handle the error appropriately for your application
-
-            finally:
-                if connection:
-                    try:
-                        connection.close()
-                    except Exception:
-                        pass # Suppress errors during connection closing if not critical
-
+            email = EmailMessage(
+                notification_subject,
+                notification_body,
+                settings.DEFAULT_FROM_EMAIL,
+                # [ticket.owner.email],
+                settings.admin_email,  # Use admin email for notifications
+                connection=connection
+            )
+            email.send()
+            connection.close()
 
             return redirect('inbox')
     else:
