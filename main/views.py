@@ -115,19 +115,51 @@ def followup_create_view(request):
                 f"(http://localhost:8000/ticket/{ticket.id}/)\n\n"
                 f"Title: {form.cleaned_data['title']}\n\n{form.cleaned_data['text']}"
             )
-            # Send email notification to the ticket owner
-            connection = get_connection()
-            connection.open()
 
-            email = EmailMessage(
-                notification_subject,
-                notification_body,
-                settings.DEFAULT_FROM_EMAIL,
-                [ticket.owner.email],
-                connection=connection,
-            )
-            email.send(fail_silently=False)
-            connection.close()
+
+
+
+
+            # Send email notification to the ticket owner
+            # Inside main.views.followup_create_view(request, ticket_id):
+            # ... (your existing view logic) ...
+
+            # Assuming 'ticket', 'notification_subject', 'notification_body' are defined here
+            # Example:
+            # ticket = get_object_or_404(Ticket, id=ticket_id)
+            # notification_subject = "Ticket Update"
+            # notification_body = "Your ticket has been updated."
+
+            connection = None
+            try:
+                connection = get_connection()
+                connection.open()
+
+                email = EmailMessage(
+                    notification_subject,
+                    notification_body,
+                    settings.DEFAULT_FROM_EMAIL,
+                    [ticket.owner.email],
+                    connection=connection,
+                )
+                email.send(fail_silently=False)
+
+            except Exception as e: # Catch any exception that occurs during email sending
+                # Handle the error gracefully, e.g., log it, show a user-friendly message
+                # print(f"Failed to send email: {e}") # For debugging
+                # You might want to return an error response or flash a message
+                pass # Or handle the error appropriately for your application
+
+            finally:
+                if connection:
+                    try:
+                        connection.close()
+                    except Exception:
+                        pass # Suppress errors during connection closing if not critical
+
+
+
+
 
             return redirect('inbox')
     else:
