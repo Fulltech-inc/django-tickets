@@ -8,8 +8,8 @@ from django.core.mail import get_connection, EmailMessage
 from django.conf import settings
 from .models import Ticket, Attachment, FollowUp
 from .forms import UserSettingsForm, TicketCreateForm, TicketEditForm, FollowupForm, AttachmentForm
+import logging, os
 
-import logging
 logger = logging.getLogger(__name__)
 
 
@@ -124,7 +124,7 @@ def followup_create_view(request):
                 notification_body,
                 settings.DEFAULT_FROM_EMAIL,
                 # [ticket.owner.email],
-                settings.admin_email,  # Use admin email for notifications
+                [os.environ.get("DJANGO_TICKET_EMAIL_NOTIFICATIONS_TO")],  # Use admin email for notifications
                 connection=connection
             )
             email.send()
