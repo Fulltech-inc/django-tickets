@@ -117,6 +117,13 @@ def followup_create_view(request):
             from django.core.mail import send_mail
             from django.conf import settings
 
+            logger.error("📧 Starting email send process...")
+
+            logger.error(f"EMAIL_HOST: {settings.EMAIL_HOST}")
+            logger.error(f"EMAIL_USER: {settings.EMAIL_HOST_USER}")
+            logger.error(f"DEFAULT_FROM_EMAIL: {settings.DEFAULT_FROM_EMAIL}")
+            logger.error(f"NOTIF_TO: {settings.DEFAULT_NOTIFICATIONS_TO_EMAIL}")
+
             try:
                 send_mail(
                     subject=notification_subject,
