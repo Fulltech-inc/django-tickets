@@ -123,7 +123,7 @@ def followup_create_view(request):
                     subject=notification_subject,
                     message=notification_body,
                     from_email=settings.DEFAULT_FROM_EMAIL,
-                    recipient_list=[settings.DEFAULT_NOTIFICATIONS_TO_EMAIL],
+                    recipient_list=[ticket.owner.email],
                     fail_silently=False,
                 )
 
