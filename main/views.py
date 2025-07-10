@@ -117,23 +117,21 @@ def followup_create_view(request):
             from django.core.mail import send_mail
             from django.conf import settings
 
-            logger.error("📧 Starting email send process...")
-
-            logger.error(f"EMAIL_HOST: {settings.EMAIL_HOST}")
-            logger.error(f"EMAIL_USER: {settings.EMAIL_HOST_USER}")
-            logger.error(f"DEFAULT_FROM_EMAIL: {settings.DEFAULT_FROM_EMAIL}")
-            logger.error(f"NOTIF_TO: {settings.DEFAULT_NOTIFICATIONS_TO_EMAIL}")
-
             try:
-                send_mail(
+                logger.error("📤 Attempting to send email via send_mail()...")
+
+                result = send_mail(
                     subject=notification_subject,
                     message=notification_body,
                     from_email=settings.DEFAULT_FROM_EMAIL,
                     recipient_list=[settings.DEFAULT_NOTIFICATIONS_TO_EMAIL],
                     fail_silently=False,
                 )
+
+                logger.error(f"✅ Email send result: {result}")  # should be 1 on success
+
             except Exception as e:
-                logger.error(f"Email failed: {e}")
+                logger.error(f"❌ Email sending failed: {e.__class__.__name__}: {e}")
 
 
             return redirect('inbox')
