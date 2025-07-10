@@ -123,7 +123,6 @@ def followup_create_view(request):
                 notification_subject,
                 notification_body,
                 settings.DEFAULT_FROM_EMAIL,
-                # [ticket.owner.email],
                 ["admin@pinesofttechnologies.co.za"],  # Use admin email for notifications
                 connection=connection
             )
