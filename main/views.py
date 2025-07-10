@@ -4,8 +4,6 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.models import User
 from django.http import HttpResponseRedirect
 from django.utils import timezone
-from django.core.mail import get_connection, EmailMessage
-from django.conf import settings
 from .models import Ticket, Attachment, FollowUp
 from .forms import UserSettingsForm, TicketCreateForm, TicketEditForm, FollowupForm, AttachmentForm
 import logging
@@ -115,33 +113,20 @@ def followup_create_view(request):
                 f"Title: {form.cleaned_data['title']}\n\n{form.cleaned_data['text']}"
             )
 
-            # Manage email connection manually (production-safe)
+            # email connection
+            from django.core.mail import send_mail
+            from django.conf import settings
+
             try:
-                connection = get_connection(
-                    host=settings.EMAIL_HOST,
-                    port=settings.EMAIL_PORT,
-                    username=settings.EMAIL_HOST_USER,
-                    password=settings.EMAIL_HOST_PASSWORD,
-                    use_tls=settings.EMAIL_USE_TLS,
-                    use_ssl=settings.EMAIL_USE_SSL,
-                    fail_silently=False
-                )
-                connection.open()
-
-                email = EmailMessage(
+                send_mail(
                     subject=notification_subject,
-                    body=notification_body,
+                    message=notification_body,
                     from_email=settings.DEFAULT_FROM_EMAIL,
-                    to=[settings.DEFAULT_NOTIFICATIONS_TO_EMAIL],
-                    connection=connection
+                    recipient_list=[settings.DEFAULT_NOTIFICATIONS_TO_EMAIL],
+                    fail_silently=False,
                 )
-                email.send()
-                connection.close()
-
             except Exception as e:
-                import logging
-                logger = logging.getLogger(__name__)
-                logger.error(f"Email sending failed: {str(e)}")
+                logger.error(f"Email failed: {e}")
 
 
             return redirect('inbox')
