@@ -1,18 +1,13 @@
-import email
-import imaplib
-import mimetypes
-import re
-import os
 from email.header import decode_header
 from email.utils import parseaddr, collapse_rfc2231_value
-from optparse import make_option
 from email_reply_parser import EmailReplyParser
 from django.core.files.base import ContentFile
 from django.core.management.base import BaseCommand
 from django.contrib.auth.models import User
 from django.utils import timezone
-
 from main.models import Ticket, Attachment, FollowUp
+
+import os, re, mimetypes, imaplib, email
 
 class Command(BaseCommand):
     def add_arguments(self, parser):

@@ -8,7 +8,7 @@ from django.core.mail import get_connection, EmailMessage
 from django.conf import settings
 from .models import Ticket, Attachment, FollowUp
 from .forms import UserSettingsForm, TicketCreateForm, TicketEditForm, FollowupForm, AttachmentForm
-import logging, os
+import logging
 
 logger = logging.getLogger(__name__)
 
