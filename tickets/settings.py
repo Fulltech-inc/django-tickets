@@ -14,7 +14,7 @@ raw_hosts = os.environ.get("DJANGO_ALLOWED_HOSTS", "")
 ALLOWED_HOSTS = [host.strip() for host in raw_hosts.split(",") if host.strip()]
 
 if ENV == "production":
-    DEBUG = False
+    DEBUG = True
     # Only set these to True if you're using HTTPS — which you're not (based on http://5.189.181.199:8000 in your original message).
     SESSION_COOKIE_SECURE = False
     CSRF_COOKIE_SECURE = False
