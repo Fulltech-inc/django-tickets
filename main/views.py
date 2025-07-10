@@ -123,7 +123,7 @@ def followup_create_view(request):
                 notification_subject,
                 notification_body,
                 settings.DEFAULT_FROM_EMAIL,
-                [os.environ["DJANGO_TICKET_EMAIL_NOTIFICATIONS_TO"]],  # Use admin email for notifications
+                settings.DEFAULT_NOTIFICATIONS_TO_EMAIL,
                 connection=connection
             )
             email.send()
