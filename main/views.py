@@ -116,24 +116,32 @@ def followup_create_view(request):
             )
 
             # Manage email connection manually (production-safe)
-            connection = get_connection(
-                host=settings.EMAIL_HOST,
-                port=settings.EMAIL_PORT,
-                username=settings.EMAIL_HOST_USER,
-                password=settings.EMAIL_HOST_PASSWORD,
-                use_tls=settings.EMAIL_USE_TLS,
-                use_ssl=settings.EMAIL_USE_SSL,
-                fail_silently=False
-            )
+            try:
+                connection = get_connection(
+                    host=settings.EMAIL_HOST,
+                    port=settings.EMAIL_PORT,
+                    username=settings.EMAIL_HOST_USER,
+                    password=settings.EMAIL_HOST_PASSWORD,
+                    use_tls=settings.EMAIL_USE_TLS,
+                    use_ssl=settings.EMAIL_USE_SSL,
+                    fail_silently=False
+                )
+                connection.open()
 
-            email = EmailMessage(
-                notification_subject,
-                notification_body,
-                settings.DEFAULT_FROM_EMAIL,
-                [settings.DEFAULT_NOTIFICATIONS_TO_EMAIL],
-                connection=connection
-            )
-            email.send()
+                email = EmailMessage(
+                    subject=notification_subject,
+                    body=notification_body,
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    to=[settings.DEFAULT_NOTIFICATIONS_TO_EMAIL],
+                    connection=connection
+                )
+                email.send()
+                connection.close()
+
+            except Exception as e:
+                import logging
+                logger = logging.getLogger(__name__)
+                logger.error(f"Email sending failed: {str(e)}")
 
 
             return redirect('inbox')
