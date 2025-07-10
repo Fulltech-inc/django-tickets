@@ -123,7 +123,7 @@ def followup_create_view(request):
                 notification_subject,
                 notification_body,
                 settings.DEFAULT_FROM_EMAIL,
-                settings.DEFAULT_NOTIFICATIONS_TO_EMAIL,
+                [settings.DEFAULT_NOTIFICATIONS_TO_EMAIL],
                 connection=connection
             )
             email.send()
