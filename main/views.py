@@ -6,6 +6,8 @@ from django.http import HttpResponseRedirect
 from django.utils import timezone
 from .models import Ticket, Attachment, FollowUp
 from .forms import UserSettingsForm, TicketCreateForm, TicketEditForm, FollowupForm, AttachmentForm
+from django.core.mail import send_mail
+from django.conf import settings
 import logging
 
 logger = logging.getLogger(__name__)
@@ -114,11 +116,8 @@ def followup_create_view(request):
             )
 
             # email connection
-            from django.core.mail import send_mail
-            from django.conf import settings
-
             try:
-                logger.error("📤 Attempting to send email via send_mail()...")
+                logger.info("📤 Attempting to send email via send_mail()...")
 
                 result = send_mail(
                     subject=notification_subject,
@@ -128,7 +127,7 @@ def followup_create_view(request):
                     fail_silently=False,
                 )
 
-                logger.error(f"✅ Email send result: {result}")  # should be 1 on success
+                logger.info(f"✅ Email send result: {result}")  # should be 1 on success
 
             except Exception as e:
                 logger.error(f"❌ Email sending failed: {e.__class__.__name__}: {e}")
