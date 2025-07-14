@@ -59,6 +59,9 @@ def usersettings_update_view(request):
     return render(request, 'main/settings.html', context)
 
 
+
+from urllib.parse import unquote
+
 def ticket_create_view(request):
     if request.method == 'POST':
         form = TicketCreateForm(request.POST)
@@ -69,9 +72,27 @@ def ticket_create_view(request):
             obj.save()
             return redirect('inbox')
     else:
-        form = TicketCreateForm()
+        # Extract caller info from GET parameters
+        call_id = request.GET.get('call_id', '')
+        caller_id = request.GET.get('caller_id', '')
+        caller_name = request.GET.get('caller_name', '')
+        queue = request.GET.get('queue', '')
+
+        # Optional: Decode URL-encoded values
+        caller_id = unquote(caller_id)
+        caller_name = unquote(caller_name)
+
+        # Prepopulate form fields
+        initial_data = {
+            'title': f"Call from {caller_name}" if caller_name else '',
+            'description': f"Calle ID: {call_id}\nCaller ID: {caller_id}\nCaller Name: {caller_name}\nQueue: {queue}" if  call_id or caller_id or caller_name or queue else ''
+        }
+
+        form = TicketCreateForm(initial=initial_data)
+
     context = {'form': form}
     return render(request, 'main/ticket_edit.html', context)
+
 
 
 def ticket_edit_view(request, pk):
