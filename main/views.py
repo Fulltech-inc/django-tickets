@@ -70,6 +70,31 @@ def ticket_create_view(request):
             obj.owner = request.user
             obj.status = "TODO"
             obj.save()
+
+
+            notification_subject = f"[#{obj.id}] New ticket created"
+            notification_body = (
+                f"Hi,\n\na new ticket was created: http://{request.get_host()}/ticket/{obj.id}/"
+            )
+
+            # email connection
+            try:
+                logger.info("📤 Attempting to send email via send_mail()...")
+
+                result = send_mail(
+                    subject=notification_subject,
+                    message=notification_body,
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    recipient_list=[settings.EMAIL_NOTIFICATIONS_TO],
+                    fail_silently=False,
+                )
+
+                logger.info(f"✅ Email send result: {result}")  # should be 1 on success
+
+            except Exception as e:
+                logger.error(f"❌ Email sending failed: {e.__class__.__name__}: {e}")
+
+
             return redirect('inbox')
     else:
         # Extract caller info from GET parameters
