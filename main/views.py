@@ -79,7 +79,7 @@ def ticket_create_view(request):
 
             # email connection
             try:
-                logger.info("📤 Attempting to send email via send_mail()...")
+                logger.info("Attempting to send email via send_mail()...")
 
                 result = send_mail(
                     subject=notification_subject,
@@ -89,10 +89,10 @@ def ticket_create_view(request):
                     fail_silently=False,
                 )
 
-                logger.info(f"✅ Email send result: {result}")  # should be 1 on success
+                logger.info(f"Email send result: {result}")  # should be 1 on success
 
             except Exception as e:
-                logger.error(f"❌ Email sending failed: {e.__class__.__name__}: {e}")
+                logger.error(f"Email sending failed: {e.__class__.__name__}: {e}")
 
 
             return redirect('inbox')
@@ -163,7 +163,7 @@ def followup_create_view(request):
 
             # email connection
             try:
-                logger.info("📤 Attempting to send email via send_mail()...")
+                logger.info("Attempting to send email via send_mail()...")
 
                 result = send_mail(
                     subject=notification_subject,
@@ -173,10 +173,10 @@ def followup_create_view(request):
                     fail_silently=False,
                 )
 
-                logger.info(f"✅ Email send result: {result}")  # should be 1 on success
+                logger.info(f"Email send result: {result}")  # should be 1 on success
 
             except Exception as e:
-                logger.error(f"❌ Email sending failed: {e.__class__.__name__}: {e}")
+                logger.error(f"Email sending failed: {e.__class__.__name__}: {e}")
 
 
             return redirect('inbox')
