@@ -63,25 +63,18 @@ def ticket_create_view(request):
             # Email notifications
             try:
                 base_url = f"http://{request.get_host()}/ticket/{obj.id}/"
-                recipients = [obj.owner.email, obj.assigned_to.email]
+                
+                logger.info(f"Sending email: [#{obj.id}] Assigned a ticket")
 
-                emails = [
-                    (f"[#{obj.id}] Ticket created successfully", f"Hi,\n\nYour ticket was created successfully: {base_url}"),
-                    (f"[#{obj.id}] Assigned a ticket", f"Hi,\n\nA ticket was assigned to you: {base_url}"),
-                ]
+                result = send_mail(
+                    subject=f"[#{obj.id}] Assigned a ticket",
+                    message=f"Hi,\n\nA ticket was assigned to you: {base_url}",
+                    from_email=settings.EMAIL_HOST_USER,
+                    recipient_list=[obj.assigned_to.email],
+                    fail_silently=False,
+                )
 
-                for subject, body in emails:
-                    logger.info(f"Sending email: {subject}")
-
-                    result = send_mail(
-                        subject=subject,
-                        message=body,
-                        from_email=settings.EMAIL_HOST_USER,
-                        recipient_list=recipients,
-                        fail_silently=False,
-                    )
-
-                    logger.info(f"Result: {result}")
+                logger.info(f"Result: {result}")
 
             except Exception as e:
                 logger.error(f"Email failed: {e}")
