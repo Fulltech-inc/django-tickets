@@ -14,8 +14,13 @@
 
 <script type="text/javascript">
     $(document).ready(function() {
-        $('#assigned').dataTable();
-        $('#unassigned').dataTable();
+        $('#unassigned').DataTable({
+            order: [[0, 'desc']]
+        });
+
+        $('#assigned').DataTable({
+            order: [[0, 'desc']]
+        });
     });
 </script>
 
@@ -38,6 +43,7 @@
                     <th>Assignee</th>
                     <th>Title</th>
                     <th>Description</th>
+                    <th>Created At</th>
                 </tr>
             </thead>
 
@@ -62,6 +68,7 @@
                     <td>{% if ticket.assigned_to %}{{ ticket.assigned_to }}{% else %}---{% endif %}</td>
                     <td>{{ ticket.title }}</td>
                     <td>{{ ticket.description }}</td>
+                    <td>{{ ticket.created }}</td>
                 </tr>
                 {% endfor %}
             </tbody>

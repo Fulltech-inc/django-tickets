@@ -13,7 +13,9 @@
 
 <script type="text/javascript">
     $(document).ready(function() {
-        $('#archived').dataTable();
+        $('#archived').DataTable({
+            order: [[0, 'desc']]
+        });
     });
 </script>
 
@@ -37,6 +39,7 @@
                     <th>Title</th>
                     <th>Description</th>
                     <th>Closed</th>
+                    <th>Created At</th>
                 </tr>
             </thead>
 
@@ -49,6 +52,7 @@
                     <td>{{ ticket.title }}</td>
                     <td>{{ ticket.description }}</td>
                     <td>{{ ticket.closed_date|date:"d.m.Y, G:i" }}</td>
+                    <td>{{ ticket.created }}</td>
                 </tr>
                 {% endfor %}
             </tbody>
