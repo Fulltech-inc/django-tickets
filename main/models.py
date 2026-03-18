@@ -18,12 +18,11 @@ class Ticket(models.Model):
     owner = models.ForeignKey(
         User,
         related_name='tickets_owned',
-        blank=True,
         null=True,
         verbose_name='Owner',
         on_delete=models.SET_NULL
     )
-    description = models.TextField('Description', blank=True, null=True)
+    description = models.TextField('Description', null=True)
     status = models.CharField(
         'Status',
         choices=STATUS_CHOICES,
@@ -43,7 +42,6 @@ class Ticket(models.Model):
     assigned_to = models.ForeignKey(
         User,
         related_name='tickets_assigned_to',
-        blank=True,
         null=True,
         verbose_name='Assigned to',
         on_delete=models.SET_NULL

@@ -1,20 +1,21 @@
 # -*- coding: utf-8 -*-
 
 import os
+from decouple import config
 
 # Base directory of the project
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
-SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "dev-secret-key")
+SECRET_KEY = config("DJANGO_SECRET_KEY", "dev-secret-key")
 
-ENV = os.environ.get("DJANGO_ENV", "development").lower()
+ENV = config("DJANGO_ENV", "development").lower()
 
 # Allowed hosts from environment
-raw_hosts = os.environ.get("DJANGO_ALLOWED_HOSTS", "")
+raw_hosts = config("DJANGO_ALLOWED_HOSTS", "")
 ALLOWED_HOSTS = [host.strip() for host in raw_hosts.split(",") if host.strip()]
 
 if ENV == "production":
-    DEBUG = True
+    DEBUG = False
     # Only set these to True if you're using HTTPS — which you're not (based on http://5.189.181.199:8000 in your original message).
     SESSION_COOKIE_SECURE = False
     CSRF_COOKIE_SECURE = False
@@ -90,11 +91,11 @@ USE_L10N = True
 
 # Static and media files
 STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, os.environ.get("DJANGO_STATIC_ROOT", "staticfiles"))
+STATIC_ROOT = os.path.join(BASE_DIR, config("DJANGO_STATIC_ROOT", "staticfiles"))
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 
 MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, os.environ.get("DJANGO_MEDIA_ROOT", "media"))
+MEDIA_ROOT = os.path.join(BASE_DIR, config("DJANGO_MEDIA_ROOT", "media"))
 
 # Auth settings
 LOGIN_REDIRECT_URL = "/inbox/"
@@ -103,27 +104,17 @@ LOGIN_URL = "/"
 # Django Crispy Forms
 CRISPY_TEMPLATE_PACK = 'bootstrap3'
 
-# Admins & Managers
-admin_name = os.environ.get("DJANGO_ADMIN_NAME")
-admin_email = os.environ.get("DJANGO_ADMIN_EMAIL")
-ADMINS = [(admin_name, admin_email)] if admin_name and admin_email else []
-MANAGERS = [(admin_name, admin_email)] if admin_name and admin_email else []
-
 # Email configuration
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = os.environ.get("DJANGO_EMAIL_HOST", "")
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_USE_SSL = False
-EMAIL_HOST_USER = os.environ.get("DJANGO_EMAIL_HOST_USER", "")
-EMAIL_HOST_PASSWORD = os.environ.get("DJANGO_EMAIL_HOST_PASSWORD", "")
-EMAIL_NOTIFICATIONS_TO = os.environ.get("DJANGO_TICKET_EMAIL_NOTIFICATIONS_TO", "")
-
-DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
-DEFAULT_NOTIFICATIONS_TO_EMAIL = EMAIL_NOTIFICATIONS_TO
+EMAIL_HOST = config("DJANGO_EMAIL_HOST", "")
+EMAIL_PORT = config("DJANGO_EMAIL_SMTP_PORT", "")
+EMAIL_USE_TLS = False
+EMAIL_USE_SSL = True
+EMAIL_HOST_USER = config("DJANGO_EMAIL_HOST_USER", "")
+EMAIL_HOST_PASSWORD = config("DJANGO_EMAIL_HOST_PASSWORD", "")
 
 # Logging configuration
-log_file_path = os.environ.get("DJANGO_LOG_FILE", os.path.join(BASE_DIR, "log.txt"))
+log_file_path = config("DJANGO_LOG_FILE", os.path.join(BASE_DIR, "log.txt"))
 
 LOGGING = {
     'version': 1,

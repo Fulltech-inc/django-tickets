@@ -34,7 +34,6 @@ urlpatterns = [
 
     # Ticket overviews
     path('inbox/', login_required(main.views.inbox_view), name='inbox'),
-    path('my-tickets/', login_required(main.views.my_tickets_view), name='my-tickets'),
     path('all-tickets/', login_required(main.views.all_tickets_view), name='all-tickets'),
     path('archive/', login_required(main.views.archive_view), name='archive'),
 ]

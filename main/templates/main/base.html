@@ -6,7 +6,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="shortcut icon" href="{% static 'img/favicon.jpg' %}">
+    <link rel="shortcut icon" href="{% static 'img/favicon.png' %}">
 
     <!-- Bootstrap CSS -->
     <link href="{% static 'bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
@@ -47,7 +47,6 @@
         <div class="collapse navbar-collapse" id="navbar-collapse-main">
             <ul class="nav navbar-nav">
                 <li><a href="{% url 'inbox' %}" title="Inbox"><i class="fa fa-home"></i></a></li>
-                <li><a href="{% url 'my-tickets' %}" title="My Tickets"><i class="fa fa-user"></i></a></li>
                 <li><a href="{% url 'all-tickets' %}" title="All Tickets"><i class="fa fa-list"></i></a></li>
                 <li><a href="{% url 'archive' %}" title="Archive"><i class="fa fa-archive"></i></a></li>
             </ul>
@@ -87,10 +86,10 @@
     <footer>
         <div class="row">
             <div class="col-lg-6">
-                <p>Powered by <a href="https://www.python.org/" target="_blank">Python</a>, <a href="https://www.djangoproject.com/" target="_blank">Django</a>, and <a href="http://getbootstrap.com/" target="_blank">Bootstrap</a></p>
+                <p>Powered by <a href="https://www.djangoproject.com/" target="_blank">Django</a></p>
             </div>
             <div class="col-lg-6 text-right">
-                <p>License: <a href="https://github.com/suenkler/django-tickets" target="_blank">MIT</a></p>
+                <p class="mb-2 text-muted">&copy; <a href="https://www.marketmavens.co.zw" target="_blank">Market Mavens</a></p>
             </div>
         </div>
     </footer>

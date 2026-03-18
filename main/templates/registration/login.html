@@ -8,7 +8,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="">
     <meta name="author" content="">
-    <link rel="shortcut icon" href="{% static 'img/favicon.jpg' %}">
+    <link rel="shortcut icon" href="{% static 'img/favicon.png' %}">
     <title>Market Mavens - Ticketing App</title>
 
     <!-- Bootstrap core CSS -->
@@ -29,15 +29,18 @@
         <div class="collapse navbar-collapse">
           
           <!-- Left side - Logo and Title -->
-          <ul class="nav navbar-nav" style="display: flex; align-items: center; gap: 15px; margin: 5px 0;">
+          <ul class="nav navbar-nav" style="display: flex; align-items: center; margin: 5px 0;">
             <li style="display: flex; align-items: center;">
-              <img src="{% static 'img/frontpage/marketmavens.jpg' %}"
+              <img src="{% static 'img/frontpage/marketmavens.png' %}"
                   class="img-responsive"
                   alt="Django Tickets"
                   style="height: 50px; width: auto; margin: 0;">
             </li>
-            <li style="display: flex; align-items: center;">
-              <b style="color: white; font-size: 18px;">Market Mavens Ticketing System</b>
+            <li>
+              <b style="color: white; font-size: 20px;">
+                Market Mavens<sup style="font-size: 14px;">&trade;</sup>
+              </b>
+              <b style="color: white; font-size: 14px;">Ticketing System</b>
             </li>
           </ul>
 
@@ -69,17 +72,13 @@
 
     <div class="container">
       <div class="row">
-        <div class="col-lg-4">
+        <div class="col-lg-6">
           <h2><i class="fa fa-cloud"></i> Web based</h2>
           <p>This is a web based ticketing application. No local installations needed besides a web browser.</p>
         </div>
-        <div class="col-lg-4">
+        <div class="col-lg-6">
           <h2><i class="fa fa-users"></i> Multi User</h2>
           <p>Users can create, assign, comment, and manage ticket status collaboratively.</p>
-        </div>
-        <div class="col-lg-4">
-          <h2><i class="fa fa-envelope"></i> Email integration</h2>
-          <p>The app checks IMAP inboxes and turns emails into tickets automatically.</p>
         </div>
       </div>
 
@@ -103,9 +102,7 @@
       <div class="footer">
         <div class="row">
           <div class="col-lg-6">
-            <p>Powered by <a href="https://www.python.org/" target="_blank">Python</a>,
-               <a href="https://www.djangoproject.com/" target="_blank">Django</a>,
-               and <a href="http://getbootstrap.com/" target="_blank">Bootstrap</a></p>
+            <p>Powered by <a href="https://www.djangoproject.com/" target="_blank">Django</a></p>
           </div>
           <div class="col-lg-6 text-right">
             <p class="mb-2 text-muted">

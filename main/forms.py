@@ -15,14 +15,13 @@ class UserSettingsForm(forms.ModelForm):
 class TicketCreateForm(forms.ModelForm):
     class Meta:
         model = Ticket
-        fields = ('title', 'description')
+        fields = ('title', 'description', 'assigned_to')
 
 
 class TicketEditForm(forms.ModelForm):
     class Meta:
         model = Ticket
-        fields = ('title', 'owner', 'description',
-                  'status', 'waiting_for', 'assigned_to')
+        fields = ('title', 'description', 'status', 'waiting_for', 'assigned_to')
 
 
 class FollowupForm(forms.ModelForm):

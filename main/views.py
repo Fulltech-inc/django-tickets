@@ -14,24 +14,13 @@ logger = logging.getLogger(__name__)
 
 
 def inbox_view(request):
-    users = User.objects.all()
-    tickets_unassigned = Ticket.objects.exclude(assigned_to__in=users)
-    tickets_assigned = Ticket.objects.filter(assigned_to__in=users)
-    context = {
-        "tickets_assigned": tickets_assigned,
-        "tickets_unassigned": tickets_unassigned,
-    }
-    return render(request, 'main/inbox.html', context)
-
-
-def my_tickets_view(request):
     tickets = Ticket.objects.filter(assigned_to=request.user).exclude(status="DONE")
     tickets_waiting = Ticket.objects.filter(waiting_for=request.user, status="WAITING")
     context = {
         "tickets": tickets,
         "tickets_waiting": tickets_waiting,
     }
-    return render(request, 'main/my-tickets.html', context)
+    return render(request, 'main/inbox.html', context)
 
 
 def all_tickets_view(request):
@@ -71,29 +60,31 @@ def ticket_create_view(request):
             obj.status = "TODO"
             obj.save()
 
-
-            notification_subject = f"[#{obj.id}] New ticket created"
-            notification_body = (
-                f"Hi,\n\na new ticket was created: http://{request.get_host()}/ticket/{obj.id}/"
-            )
-
-            # email connection
+            # Email notifications
             try:
-                logger.info("Attempting to send email via send_mail()...")
+                base_url = f"http://{request.get_host()}/ticket/{obj.id}/"
+                recipients = [obj.owner.email, obj.assigned_to.email]
 
-                result = send_mail(
-                    subject=notification_subject,
-                    message=notification_body,
-                    from_email=settings.DEFAULT_FROM_EMAIL,
-                    recipient_list=[settings.EMAIL_NOTIFICATIONS_TO],
-                    fail_silently=False,
-                )
+                emails = [
+                    (f"[#{obj.id}] Ticket created successfully", f"Hi,\n\nYour ticket was created successfully: {base_url}"),
+                    (f"[#{obj.id}] Assigned a ticket", f"Hi,\n\nA ticket was assigned to you: {base_url}"),
+                ]
 
-                logger.info(f"Email send result: {result}")  # should be 1 on success
+                for subject, body in emails:
+                    logger.info(f"Sending email: {subject}")
+
+                    result = send_mail(
+                        subject=subject,
+                        message=body,
+                        from_email=settings.EMAIL_HOST_USER,
+                        recipient_list=recipients,
+                        fail_silently=False,
+                    )
+
+                    logger.info(f"Result: {result}")
 
             except Exception as e:
-                logger.error(f"Email sending failed: {e.__class__.__name__}: {e}")
-
+                logger.error(f"Email failed: {e}")
 
             return redirect('inbox')
     else:
@@ -125,9 +116,71 @@ def ticket_edit_view(request, pk):
     if request.method == 'POST':
         form = TicketEditForm(request.POST, instance=data)
         if form.is_valid():
+            data = form.instance
+
+            # Get original values from DB
+            old_data = type(data).objects.get(pk=data.pk)
+
+            # Detect changes
+            assigned_to_changed = old_data.assigned_to != form.cleaned_data.get('assigned_to')
+            waiting_for_changed = old_data.waiting_for != form.cleaned_data.get('waiting_for')
+
+            # Existing logic
             if form.cleaned_data['status'] == "DONE":
                 data.closed_date = timezone.now()
+
             form.save()
+
+            # React to changes
+            base_url = f"http://{request.get_host()}/ticket/{data.id}/"
+            if assigned_to_changed:
+
+                notification_subject = f"[#{data.id}] Assigned a ticket"
+                notification_body = f"Hi,\n\nA ticket was assigned to you: {base_url}"
+
+                # email connection
+                try:
+                    logger.info("Attempting to send email via send_mail()...")
+
+                    result = send_mail(
+                        subject=notification_subject,
+                        message=notification_body,
+                        from_email=settings.EMAIL_HOST_USER,
+                        recipient_list=[data.assigned_to.email],
+                        fail_silently=False,
+                    )
+
+                    logger.info(f"Email send result: {result}")  # should be 1 on success
+
+                except Exception as e:
+                    logger.error(f"Email sending failed: {e.__class__.__name__}: {e}")
+
+                logger.info(f"assigned_to changed to {data.assigned_to}")
+
+            if waiting_for_changed:
+
+                notification_subject = f"[#{data.id}] Colleagues are waiting for your input!"
+                notification_body = f"Hi,\n\nColleagues are waiting for your input on ticket: {base_url}"
+
+                # email connection
+                try:
+                    logger.info("Attempting to send email via send_mail()...")
+
+                    result = send_mail(
+                        subject=notification_subject,
+                        message=notification_body,
+                        from_email=settings.EMAIL_HOST_USER,
+                        recipient_list=[data.waiting_for.email],
+                        fail_silently=False,
+                    )
+
+                    logger.info(f"Email send result: {result}")  # should be 1 on success
+
+                except Exception as e:
+                    logger.error(f"Email sending failed: {e.__class__.__name__}: {e}")
+
+                logger.info(f"waiting_for changed to {data.waiting_for}")
+
             return redirect('inbox')
     else:
         form = TicketEditForm(instance=data)
@@ -168,7 +221,7 @@ def followup_create_view(request):
                 result = send_mail(
                     subject=notification_subject,
                     message=notification_body,
-                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    from_email=settings.EMAIL_HOST_USER,
                     recipient_list=[ticket.owner.email],
                     fail_silently=False,
                 )
