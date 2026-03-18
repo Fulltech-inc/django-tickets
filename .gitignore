@@ -21,8 +21,11 @@ media/
 # database not in repo
 db.sqlite3
 
-# virtual evironment
+# virtual environment
 .venv
+
+# environment variable
+.env
 
 # static root folder for local deployments
 static_root
