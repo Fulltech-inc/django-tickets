@@ -8,11 +8,9 @@ class MainConfig(AppConfig):
     name = 'main'
 
     def ready(self):
-        # Skip during migrations
         if 'migrate' in sys.argv or 'makemigrations' in sys.argv:
             return
             
-        # Only run in development server, avoid double execution
         if os.environ.get('RUN_MAIN') != 'true' and 'runserver' in sys.argv:
             # Wait a bit for database to be ready
             import time

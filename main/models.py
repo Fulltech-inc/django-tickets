@@ -102,8 +102,6 @@ class Attachment(models.Model):
 
 # ── UserProfile ───────────────────────────────────────────────
 
-# main/models.py - UserProfile (has targets) and EscalationConfig (has thresholds only)
-
 class UserProfile(models.Model):
     user = models.OneToOneField(
         User,

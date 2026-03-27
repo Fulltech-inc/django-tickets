@@ -37,7 +37,7 @@ urlpatterns = [
     path('all-tickets/', login_required(main.views.all_tickets_view), name='all-tickets'),
     path('archive/', login_required(main.views.archive_view), name='archive'),
 
-    
+    #ESCALATIONS
     path('escalations/', escalations_view, name='escalations'),
     path('escalations/<int:pk>/acknowledge/', escalation_acknowledge_view, name='escalation_acknowledge'),
     path('escalations/<int:pk>/resolve/', escalation_resolve_view, name='escalation_resolve'),

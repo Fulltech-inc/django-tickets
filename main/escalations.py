@@ -1,4 +1,4 @@
-# main/escalations.py - Updated to include TODO tickets
+# main/escalations.py
 
 import logging
 from datetime import timedelta
