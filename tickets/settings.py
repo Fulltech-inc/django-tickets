@@ -40,6 +40,8 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'crispy_forms',
+    'django_apscheduler', 
+
 )
 
 TEMPLATES = [
@@ -112,6 +114,10 @@ EMAIL_USE_TLS = False
 EMAIL_USE_SSL = True
 EMAIL_HOST_USER = config("DJANGO_EMAIL_HOST_USER", "")
 EMAIL_HOST_PASSWORD = config("DJANGO_EMAIL_HOST_PASSWORD", "")
+
+SITE_BASE_URL = "http://127.0.0.1:8000"
+APSCHEDULER_DATETIME_FORMAT = "N j, Y, f:s a"
+APSCHEDULER_RUN_NOW_TIMEOUT = 25  # seconds
 
 # Logging configuration
 log_file_path = config("DJANGO_LOG_FILE", os.path.join(BASE_DIR, "log.txt"))

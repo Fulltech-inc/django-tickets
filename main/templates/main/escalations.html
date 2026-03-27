@@ -1,0 +1,104 @@
+{% extends "main/base.html" %}
+{% load static %}
+
+{% block title %}Escalations{% endblock %}
+{% block headline %}Escalations{% endblock %}
+{% block header_icon %}<i class="fa fa-exclamation-triangle"></i>{% endblock %}
+{% block head-message %}
+  {{ pending_count }} pending escalation{{ pending_count|pluralize }}
+{% endblock %}
+
+{% block content %}
+<div class="row" style="margin-top: 20px;">
+  <div class="col-lg-12">
+
+    {% if not escalations %}
+      <div class="alert alert-success">
+        <i class="fa fa-check-circle"></i> No active escalations. All clear.
+      </div>
+    {% else %}
+      <table class="table table-bordered table-hover">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Ticket</th>
+            <th>Level</th>
+            <th>From</th>
+            <th>To</th>
+            <th>Escalated At</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for esc in escalations %}
+          <tr class="{% if esc.escalation_level == 2 %}danger{% elif esc.status == 'PENDING' %}warning{% else %}{% endif %}">
+            <td>{{ esc.id }}</td>
+            <td>
+              <a href="{% url 'ticket_detail' esc.ticket.id %}">
+                #{{ esc.ticket.id }} — {{ esc.ticket.title }}
+              </a>
+              <br>
+              <small class="text-muted">Status: {{ esc.ticket.status }}</small>
+            </td>
+            <td>
+              {% if esc.escalation_level == 1 %}
+                <span class="label label-warning">Level 1</span>
+              {% else %}
+                <span class="label label-danger">Level 2</span>
+              {% endif %}
+            </td>
+            <td>{{ esc.escalated_from_user.get_full_name|default:esc.escalated_from_user.username }}</td>
+            <td>{{ esc.escalated_to_user.get_full_name|default:esc.escalated_to_user.username }}</td>
+            <td>{{ esc.escalated_at|date:"d M Y H:i" }}</td>
+            <td>
+              {% if esc.status == 'PENDING' %}
+                <span class="label label-warning">Pending</span>
+              {% elif esc.status == 'ACKNOWLEDGED' %}
+                <span class="label label-info">Acknowledged</span>
+              {% elif esc.status == 'RESOLVED' %}
+                <span class="label label-success">Resolved</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if esc.status == 'PENDING' and request.user == esc.escalated_to_user or request.user.is_staff %}
+
+                {% if esc.status == 'PENDING' %}
+                <form method="post" action="{% url 'escalation_acknowledge' esc.id %}" style="display:inline;">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-xs btn-info">
+                    <i class="fa fa-check"></i> Acknowledge
+                  </button>
+                </form>
+                {% endif %}
+
+                <form method="post" action="{% url 'escalation_resolve' esc.id %}" style="display:inline;">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-xs btn-success"
+                    onclick="return confirm('Mark this escalation as resolved?')">
+                    <i class="fa fa-check-circle"></i> Resolve
+                  </button>
+                </form>
+
+                <form method="post" action="{% url 'escalation_resolve' esc.id %}" style="display:inline;">
+                  {% csrf_token %}
+                  <input type="hidden" name="close_ticket" value="1">
+                  <button type="submit" class="btn btn-xs btn-danger"
+                    onclick="return confirm('Resolve escalation AND close ticket #{{ esc.ticket.id }}?')">
+                    <i class="fa fa-times-circle"></i> Resolve + Close ticket
+                  </button>
+                </form>
+
+              {% else %}
+                <span class="text-muted">—</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% endif %}
+
+  </div>
+</div>
+{% endblock %}

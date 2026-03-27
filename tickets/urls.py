@@ -6,8 +6,8 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.urls import path, re_path
 from django.contrib.auth import views as auth_views
-
 import main.views
+from main.views import escalations_view, escalation_acknowledge_view, escalation_resolve_view
 
 urlpatterns = [
     # Login and logout pages
@@ -36,6 +36,14 @@ urlpatterns = [
     path('inbox/', login_required(main.views.inbox_view), name='inbox'),
     path('all-tickets/', login_required(main.views.all_tickets_view), name='all-tickets'),
     path('archive/', login_required(main.views.archive_view), name='archive'),
+
+    
+    path('escalations/', escalations_view, name='escalations'),
+    path('escalations/<int:pk>/acknowledge/', escalation_acknowledge_view, name='escalation_acknowledge'),
+    path('escalations/<int:pk>/resolve/', escalation_resolve_view, name='escalation_resolve'),
+
+
+
 ]
 
 if settings.DEBUG:

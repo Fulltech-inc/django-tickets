@@ -261,3 +261,79 @@ def attachment_create_view(request):
         form = AttachmentForm()
     context = {'form': form}
     return render(request, 'main/attachment_add.html', context)
+
+
+# -*- coding: utf-8 -*-
+# ─────────────────────────────────────────────────────────────
+# ADD these to your existing views.py
+# ─────────────────────────────────────────────────────────────
+
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib.auth.decorators import login_required
+from django.utils import timezone
+from .models import TicketEscalation, Ticket
+
+
+def escalations_view(request):
+    """
+    Escalation dashboard.
+    - Superusers / managers see ALL pending escalations.
+    - Regular users see only escalations assigned to them.
+    """
+    user = request.user
+
+    if user.is_superuser or user.is_staff:
+        escalations = TicketEscalation.objects.select_related(
+            'ticket', 'escalated_from_user', 'escalated_to_user'
+        ).exclude(status='RESOLVED').order_by('-escalated_at')
+    else:
+        escalations = TicketEscalation.objects.filter(
+            escalated_to_user=user
+        ).select_related(
+            'ticket', 'escalated_from_user', 'escalated_to_user'
+        ).exclude(status='RESOLVED').order_by('-escalated_at')
+
+    context = {
+        'escalations': escalations,
+        'pending_count': escalations.filter(status='PENDING').count(),
+    }
+    return render(request, 'main/escalations.html', context)
+
+
+def escalation_acknowledge_view(request, pk):
+    """Mark a single escalation as acknowledged."""
+    escalation = get_object_or_404(TicketEscalation, id=pk)
+
+    # Only the person it was escalated TO (or staff) can acknowledge
+    if request.user != escalation.escalated_to_user and not request.user.is_staff:
+        return redirect('escalations')
+
+    if request.method == 'POST':
+        escalation.acknowledge(request.user)
+
+    return redirect('escalations')
+
+
+def escalation_resolve_view(request, pk):
+    """Manually resolve an escalation (staff only or ticket owner)."""
+    escalation = get_object_or_404(TicketEscalation, id=pk)
+
+    if request.user != escalation.escalated_to_user and not request.user.is_staff:
+        return redirect('escalations')
+
+    if request.method == 'POST':
+        escalation.resolve()
+        # Also mark the ticket DONE if the user chose to close it
+        if request.POST.get('close_ticket'):
+            ticket = escalation.ticket
+            ticket.status = 'DONE'
+            ticket.closed_date = timezone.now()
+            ticket.save(update_fields=['status', 'closed_date'])
+
+            # Resolve all other open escalations for this ticket
+            TicketEscalation.objects.filter(
+                ticket=ticket,
+                status__in=['PENDING', 'ACKNOWLEDGED']
+            ).update(status='RESOLVED', resolved_at=timezone.now())
+
+    return redirect('escalations')
