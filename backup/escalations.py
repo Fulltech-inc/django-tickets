@@ -6,7 +6,6 @@ from django.utils import timezone
 from django.core.mail import send_mail
 from django.conf import settings
 from .models import Ticket, TicketEscalation, EscalationConfig
-from .activity_utils import log_activity
 
 logger = logging.getLogger(__name__)
 
@@ -46,19 +45,9 @@ def _escalate(ticket, level, from_user, to_user, base_url=""):
         notification_sent=False,
     )
 
-    # 3. Log activity
-    log_activity(
-        ticket, 
-        'ESCALATED', 
-        performed_by=from_user if from_user else to_user,
-        from_dept=from_user,
-        to_dept=to_user,
-        comment=f"Escalated to Level {level} - {to_user}"
-    )
-
     ticket_url = f"{base_url}/ticket/{ticket.id}/"
 
-    # 4. Notify the NEW Owner (The Escalation Target)
+    # 3. Notify the NEW Owner (The Escalation Target)
     _send_escalation_email(
         subject=f"[Escalation L{level}] Ticket #{ticket.id} assigned to you",
         message=(
@@ -70,7 +59,7 @@ def _escalate(ticket, level, from_user, to_user, base_url=""):
         recipient_email=to_user.email,
     )
 
-    # 5. Notify the PREVIOUS Owner (The person it was taken from)
+    # 4. Notify the PREVIOUS Owner (The person it was taken from)
     if from_user and from_user.email:
         _send_escalation_email(
             subject=f"[Escalation L{level}] Ticket #{ticket.id} moved from your queue",
@@ -84,7 +73,7 @@ def _escalate(ticket, level, from_user, to_user, base_url=""):
             recipient_email=from_user.email,
         )
 
-    # 6. Mark as complete
+    # 5. Mark as complete
     escalation.notification_sent = True
     escalation.save(update_fields=['notification_sent'])
     logger.info(f"Ticket #{ticket.id} escalated to L{level} -> {to_user}")
@@ -122,6 +111,7 @@ def _escalate(ticket, level, from_user, to_user, base_url=""):
     escalation.notification_sent = True
     escalation.save(update_fields=['notification_sent'])
     logger.info(f"Ticket #{ticket.id} escalated to L{level} -> {to_user}")
+
 
 def run_escalation_check(base_url=""):
     """

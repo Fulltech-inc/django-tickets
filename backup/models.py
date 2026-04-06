@@ -11,7 +11,6 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-
 class Ticket(models.Model):
     STATUS_CHOICES = (
         ('TODO', 'TODO'),
@@ -54,8 +53,11 @@ class FollowUp(models.Model):
 
 
 def attachment_path(instance, filename):
-    safe_filename = filename.replace(' ', '_')
-    return f'tickets/{instance.ticket.id}/{safe_filename}'
+    path = f'tickets/{instance.ticket.id}' 
+    full_path = os.path.join(settings.MEDIA_ROOT, path)
+    if isinstance(default_storage, FileSystemStorage) and not os.path.exists(full_path):
+        os.makedirs(full_path, 0o777)
+    return os.path.join(path, filename)
     
 
 
@@ -73,10 +75,6 @@ class Attachment(models.Model):
 
     def __str__(self):
         return f"Attachment #{self.id} - {self.filename}"
-    
-    @property
-    def safe_url(self):
-        return self.file.url.replace(' ', '_')
 
 
 class UserProfile(models.Model):
@@ -187,36 +185,3 @@ class TicketEscalation(models.Model):
         self.status = 'RESOLVED'
         self.resolved_at = timezone.now()
         self.save(update_fields=['status', 'resolved_at'])
-
-
-class TicketActivity(models.Model):
-    ACTION_CHOICES = (
-        ('CREATED', 'Ticket Created'),
-        ('ASSIGNED', 'Assigned to Department'),
-        ('REASSIGNED', 'Reassigned to Another Department'),
-        ('STATUS_CHANGED', 'Status Changed'),
-        ('WAITING_FOR', 'Waiting for Input'),
-        ('FOLLOWUP_ADDED', 'Followup Added'),
-        ('ESCALATED', 'Escalated'),
-        ('CLOSED', 'Ticket Closed'),
-        ('REOPENED', 'Ticket Reopened'),
-        ('ATTACHMENT_ADDED', 'Attachment Added'),
-    )
-    
-    ticket = models.ForeignKey(Ticket, on_delete=models.CASCADE, related_name='activities')
-    action = models.CharField(max_length=50, choices=ACTION_CHOICES)
-    performed_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='performed_activities')
-    from_department = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='from_activities')
-    to_department = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='to_activities')
-    old_value = models.CharField(max_length=255, blank=True, null=True)
-    new_value = models.CharField(max_length=255, blank=True, null=True)
-    comment = models.TextField(blank=True, null=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    
-    class Meta:
-        ordering = ['-created_at']
-        verbose_name = 'Ticket Activity'
-        verbose_name_plural = 'Ticket Activities'
-    
-    def __str__(self):
-        return f"{self.action} on Ticket #{self.ticket.id} by {self.performed_by} at {self.created_at}"

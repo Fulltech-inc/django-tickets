@@ -74,12 +74,14 @@
                         <td>{{ ticket.created }}</td>
                         <td>{{ ticket.interaction_id|default:"---" }}</td>
                         <td>
-                        {% if ticket.prefetched_attachments %}
-                            <i class="fa fa-paperclip"></i> {{ ticket.prefetched_attachments|length }}
-                        {% else %}
-                            ---
-                        {% endif %}
-                    </td>
+                            {% with ticket.attachment_set.all as attachments %}
+                                {% if attachments %}
+                                    <i class="fa fa-paperclip"></i> {{ attachments|length }}
+                                {% else %}
+                                    ---
+                                {% endif %}
+                            {% endwith %}
+                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -128,11 +130,13 @@
                     <td>{{ ticket.created }}</td>
                     <td>{{ ticket.interaction_id|default:"---" }}</td>
                     <td>
-                        {% if ticket.prefetched_attachments %}
-                            <i class="fa fa-paperclip"></i> {{ ticket.prefetched_attachments|length }}
-                        {% else %}
-                            ---
-                        {% endif %}
+                        {% with ticket.attachment_set.all as attachments %}
+                            {% if attachments %}
+                                <i class="fa fa-paperclip"></i> {{ attachments|length }}
+                            {% else %}
+                                ---
+                            {% endif %}
+                        {% endwith %}
                     </td>
                 </tr>
                 {% endfor %}

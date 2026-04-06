@@ -59,7 +59,7 @@
       <h2>Attachments</h2>
       <ul>
           {% for attachment in attachments %}
-          <li><a href="/media/tickets/{{ ticket.id }}/{{ attachment.filename }}">{{ attachment.filename }}</a></li>
+          <li><a href="{{ attachment.safe_url }}">{{ attachment.filename }}</a></li>
           {% endfor %}
       </ul>
       {% endif %}
@@ -78,6 +78,48 @@
         $('#followups').dataTable();
     });
 </script>
+<!-- Activity Log -->
+<h2>Activity Log</h2>
+{% if activities %}
+<table class="table table-striped table-bordered" width="100%">
+    <thead>
+        <tr>
+            <th width="150px">Date/Time</th>
+            <th width="120px">Action</th>
+            <th width="120px">Performed By</th>
+            <th>Details</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for activity in activities %}
+    <tr>
+        <td>{{ activity.created_at|date:"Y-m-d H:i:s" }}</td>
+        <td>{{ activity.get_action_display }}</td>
+        <td>{{ activity.performed_by }}</td>
+        <td>
+            {% if activity.from_department %}
+                From: {{ activity.from_department }}<br>
+            {% endif %}
+            {% if activity.to_department %}
+                To: {{ activity.to_department }}<br>
+            {% endif %}
+            {% if activity.old_value %}
+                Old: {{ activity.old_value }}<br>
+            {% endif %}
+            {% if activity.new_value %}
+                New: {{ activity.new_value }}<br>
+            {% endif %}
+            {% if activity.comment %}
+                {{ activity.comment }}
+            {% endif %}
+        </td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% else %}
+    <p>No activities recorded yet...</p>
+{% endif %}
 
 <h2>Followups</h2>
 {% if followups %}

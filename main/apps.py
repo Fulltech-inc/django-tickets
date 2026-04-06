@@ -1,5 +1,4 @@
 from django.apps import AppConfig
-import os
 import sys
 
 
@@ -10,29 +9,30 @@ class MainConfig(AppConfig):
     def ready(self):
         if 'migrate' in sys.argv or 'makemigrations' in sys.argv:
             return
-            
-        if os.environ.get('RUN_MAIN') != 'true' and 'runserver' in sys.argv:
-            # Wait a bit for database to be ready
-            import time
-            time.sleep(3)
-            
+
+        try:
             from apscheduler.schedulers.background import BackgroundScheduler
             from apscheduler.triggers.interval import IntervalTrigger
             from django.conf import settings
 
-            # Use in-memory scheduler to avoid database locks
             scheduler = BackgroundScheduler(timezone=settings.TIME_ZONE)
-            
+
             from .escalations import run_escalation_check
 
             scheduler.add_job(
                 run_escalation_check,
-                trigger=IntervalTrigger(minutes=1),
+                trigger=IntervalTrigger(minutes=2),
                 id='run_escalation_check',
-                name='Check and escalate stale WAITING tickets',
+                name='Escalation check',
                 replace_existing=True,
-                misfire_grace_time=30,
+                coalesce=True,
+                max_instances=1,
+                misfire_grace_time=60,
+                kwargs={'base_url': 'http://127.0.0.1:8000'},
             )
 
             scheduler.start()
-            print("✅ Escalation scheduler started (in-memory mode)")
+            print("Escalation scheduler started.")
+
+        except Exception as e:
+            print(f"Escalation scheduler failed to start: {e}")

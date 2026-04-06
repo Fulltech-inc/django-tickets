@@ -3,7 +3,6 @@
 from django import forms
 from django.contrib.auth.models import User
 
-
 from .models import Ticket, FollowUp, Attachment
 
 
@@ -16,14 +15,13 @@ class UserSettingsForm(forms.ModelForm):
 class TicketCreateForm(forms.ModelForm):
     class Meta:
         model = Ticket
-        fields = ('interaction_id' , 'title', 'description', 'assigned_to')
+        fields = ('title', 'description', 'assigned_to', 'interaction_id')
 
 
 class TicketEditForm(forms.ModelForm):
-    #attachments = forms.FileField(widget=forms.ClearableFileInput(attrs={'multiple': True}), required=False)
     class Meta:
         model = Ticket
-        fields = ('interaction_id' , 'title', 'description', 'status', 'waiting_for', 'assigned_to')
+        fields = ('title', 'description', 'status', 'waiting_for', 'assigned_to', 'interaction_id')
 
 
 class FollowupForm(forms.ModelForm):

@@ -17,11 +17,6 @@
     <form action="#" method="post" enctype="multipart/form-data">
         {% csrf_token %}
         {{ form | crispy }}
-        <div class="form-group">
-            <label>Attachments</label>
-            <input type="file" name="attachments" multiple class="form-control">
-            <small class="help-block">You can select multiple files</small>
-        </div>
         <input class="btn btn-primary" type="submit" value="Save Ticket" />
     </form>
 {% else %}

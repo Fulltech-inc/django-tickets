@@ -4,13 +4,11 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.models import User
 from django.http import HttpResponseRedirect
 from django.utils import timezone
-from .models import Ticket, Attachment, FollowUp, TicketActivity
+from .models import Ticket, Attachment, FollowUp
 from .forms import UserSettingsForm, TicketCreateForm, TicketEditForm, FollowupForm, AttachmentForm
 from django.core.mail import send_mail
 from django.conf import settings
 import logging
-from .activity_utils import log_activity
-
 
 logger = logging.getLogger(__name__)
 
@@ -61,18 +59,14 @@ from urllib.parse import unquote
 
 def ticket_create_view(request):
     if request.method == 'POST':
-        form = TicketCreateForm(request.POST)
+        form = TicketCreateForm(request.POST, request.FILES) # Added request.FILES
         if form.is_valid():
             obj = form.save(commit=False)
             obj.owner = request.user
             obj.status = "TODO"
             obj.save()
 
-            log_activity(obj, 'CREATED', request.user, comment=f"Ticket created with title: {obj.title}")
-            if obj.assigned_to:
-                log_activity(obj, 'ASSIGNED', request.user, to_dept=obj.assigned_to, comment=f"Assigned to {obj.assigned_to}")
-
-            # Handle Multiple Attachments
+            # --- Handle Multiple Attachments ---
             files = request.FILES.getlist('attachments')
             for f in files:
                 Attachment.objects.create(
@@ -82,32 +76,10 @@ def ticket_create_view(request):
                     user=request.user
                 )
 
-            # Email notification debugging
+            # --- Email notification logic ---
             try:
                 base_url = f"http://{request.get_host()}/ticket/{obj.id}/"
-                
-                # Debug: print to console
-                print(f"Attempting to send email to: {obj.assigned_to}")
-                print(f"Recipient email: {obj.assigned_to.email if obj.assigned_to else 'No assigned_to'}")
-                
-                if obj.assigned_to and obj.assigned_to.email:
-                    send_mail(
-                        subject=f"[#{obj.id}] New Ticket: {obj.title}",
-                        message=f"Interaction ID: {obj.interaction_id}\n\nView: {base_url}",
-                        from_email=settings.EMAIL_HOST_USER,
-                        recipient_list=[obj.assigned_to.email],
-                        fail_silently=False,
-                    )
-                    print("Email sent successfully")
-                else:
-                    print("Skipping email - no assigned_to or no email")
-            except Exception as e:
-                logger.error(f"Email failed: {e}")
-                print(f"Email error: {e}")
-
-            # Email notification
-            try:
-                base_url = f"http://{request.get_host()}/ticket/{obj.id}/"
+                # (Keep your existing email code here...)
                 send_mail(
                     subject=f"[#{obj.id}] New Ticket: {obj.title}",
                     message=f"Interaction ID: {obj.interaction_id}\n\nView: {base_url}",
@@ -136,6 +108,7 @@ def ticket_create_view(request):
     return render(request, 'main/ticket_edit.html', context)
 
 
+
 def ticket_edit_view(request, pk):
     data = get_object_or_404(Ticket, id=pk)
     if request.method == 'POST':
@@ -155,21 +128,6 @@ def ticket_edit_view(request, pk):
                 data.closed_date = timezone.now()
 
             form.save()
-
-            # After form.save() but before redirect
-            if assigned_to_changed:
-                log_activity(data, 'REASSIGNED', request.user, 
-                            from_dept=old_data.assigned_to, 
-                            to_dept=data.assigned_to,
-                            comment=f"Reassigned from {old_data.assigned_to} to {data.assigned_to}")
-
-            if waiting_for_changed:
-                log_activity(data, 'WAITING_FOR', request.user,
-                            to_dept=data.waiting_for,
-                            comment=f"Waiting for input from {data.waiting_for}")
-
-            if form.cleaned_data['status'] == "DONE" and old_data.status != "DONE":
-                log_activity(data, 'CLOSED', request.user, comment="Ticket closed")
 
             # React to changes
             base_url = f"http://{request.get_host()}/ticket/{data.id}/"
@@ -237,10 +195,6 @@ def ticket_detail_view(request, pk):
         'attachments': attachments,
         'followups': followups,
     }
-
-    activities = TicketActivity.objects.filter(ticket=ticket)
-    context['activities'] = activities
-
     return render(request, 'main/ticket_detail.html', context)
 
 
@@ -388,37 +342,3 @@ def escalation_resolve_view(request, pk):
             ).update(status='RESOLVED', resolved_at=timezone.now())
 
     return redirect('escalations')
-
-
-from django.utils.dateparse import parse_date
-from .reports import TicketReports
-
-def reports_view(request):
-    context = {}
-    
-    # Get date range from request
-    start_date = request.GET.get('start_date')
-    end_date = request.GET.get('end_date')
-    status_filter = request.GET.get('status')
-    
-    if start_date and end_date:
-        start_date = parse_date(start_date)
-        end_date = parse_date(end_date)
-        tickets = TicketReports.tickets_by_date_range(start_date, end_date)
-        
-        if status_filter:
-            tickets = tickets.filter(status=status_filter)
-        
-        context['tickets'] = tickets
-        context['start_date'] = start_date
-        context['end_date'] = end_date
-        context['status_filter'] = status_filter
-    
-    context['status_choices'] = Ticket.STATUS_CHOICES
-    context['status_summary'] = TicketReports.tickets_by_status()
-    context['dept_summary'] = TicketReports.tickets_by_department()
-    context['avg_resolution'] = TicketReports.average_resolution_time()
-    context['sla_breaches'] = TicketReports.sla_breaches()
-    context['daily_summary'] = TicketReports.daily_ticket_summary()
-    
-    return render(request, 'main/reports.html', context)

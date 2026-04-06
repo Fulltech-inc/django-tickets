@@ -42,6 +42,8 @@ urlpatterns = [
     path('escalations/<int:pk>/acknowledge/', escalation_acknowledge_view, name='escalation_acknowledge'),
     path('escalations/<int:pk>/resolve/', escalation_resolve_view, name='escalation_resolve'),
 
+    path('reports/', login_required(main.views.reports_view), name='reports'),
+
 
 
 ]
