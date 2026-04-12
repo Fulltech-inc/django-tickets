@@ -3,7 +3,8 @@
 from django.contrib import admin
 from django.contrib.auth.models import User
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-from .models import Ticket, FollowUp, Attachment, EscalationRule, TicketEscalation, UserProfile, EscalationConfig
+from .models import Ticket, FollowUp, Attachment, EscalationRule, TicketEscalation, UserProfile, EscalationConfig, Category
+
 
 
 class UserProfileInline(admin.StackedInline):
@@ -57,9 +58,9 @@ class TicketEscalationAdmin(admin.ModelAdmin):
 
 @admin.register(Ticket)
 class TicketAdmin(admin.ModelAdmin):
-    list_display = ('id', 'title', 'status', 'assigned_to', 'escalation_count', 'last_escalation_at', 'created')
-    list_filter = ('status',)
-    search_fields = ('title',)
+    list_display = ('id', 'title', 'status', 'category', 'assigned_to', 'escalation_count', 'last_escalation_at', 'created')
+    list_filter = ('status', 'category')
+    search_fields = ('title', 'interaction_id')
 
 
 @admin.register(FollowUp)
@@ -70,3 +71,11 @@ class FollowUpAdmin(admin.ModelAdmin):
 @admin.register(Attachment)
 class AttachmentAdmin(admin.ModelAdmin):
     list_display = ('id', 'ticket', 'filename', 'user', 'created')
+
+from .models import Category
+
+@admin.register(Category)
+class CategoryAdmin(admin.ModelAdmin):
+    list_display = ('name', 'parent', 'is_active')
+    list_filter = ('parent', 'is_active')
+    search_fields = ('name',)

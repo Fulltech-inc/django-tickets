@@ -1,0 +1,254 @@
+{% extends "main/base.html" %}
+{% block title %}Generated Reports{% endblock %}
+{% block header_icon %}<i class="fa fa-download fa-5x"></i>{% endblock %}
+{% block headline %}Generated Reports{% endblock %}
+{% block head-message %}Your queued and completed reports{% endblock %}
+
+{% block content %}
+<style>
+  .gr-wrap { font-family: 'Segoe UI', sans-serif; }
+
+  .gr-toolbar {
+    display: flex; gap: 10px; align-items: center; flex-wrap: wrap;
+    margin-bottom: 18px;
+  }
+  .gr-search {
+    flex: 1; min-width: 200px; padding: 7px 12px; border: 1px solid #cbd5e1;
+    border-radius: 6px; font-size: 13px; height: 36px;
+  }
+  .gr-filter {
+    padding: 7px 10px; border: 1px solid #cbd5e1; border-radius: 6px;
+    font-size: 13px; background: #fff; height: 36px; min-width: 130px;
+  }
+  .gr-btn {
+    padding: 7px 14px; border-radius: 6px; font-size: 12px; font-weight: 600;
+    cursor: pointer; height: 36px; border: 1px solid; display: inline-flex;
+    align-items: center; gap: 5px; text-decoration: none;
+  }
+  .gr-btn.back    { border-color: #94a3b8; color: #475569; background: #fff; }
+  .gr-btn.delete  { border-color: #dc2626; color: #dc2626; background: #fff; }
+  .gr-btn.delete:hover  { background: #dc2626; color: #fff; }
+  .gr-btn.dload   { border-color: #16a34a; color: #16a34a; background: #fff; }
+  .gr-btn.dload:hover   { background: #16a34a; color: #fff; }
+  .gr-btn.back:hover    { background: #f1f5f9; }
+
+  .gr-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .gr-table thead th {
+    background: #f1f5f9; font-weight: 600; font-size: 11px; text-transform: uppercase;
+    letter-spacing: .05em; color: #64748b; padding: 10px 14px;
+    border-bottom: 1px solid #e2e8f0; white-space: nowrap;
+  }
+  .gr-table tbody td {
+    padding: 10px 14px; border-bottom: 1px solid #f1f5f9;
+    color: #1e293b; vertical-align: middle;
+  }
+  .gr-table tbody tr:hover { background: #f8fafc; }
+
+  .s-pill { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; }
+  .p-queued     { background: #f1f5f9; color: #64748b; }
+  .p-processing { background: #fef3c7; color: #d97706; }
+  .p-done       { background: #dcfce7; color: #16a34a; }
+  .p-failed     { background: #fee2e2; color: #dc2626; }
+
+  .cb-col { width: 36px; text-align: center; }
+  .empty-state { text-align: center; padding: 60px 0; color: #94a3b8; font-size: 14px; }
+
+  #delete-bar {
+    display: none; background: #fef2f2; border: 1px solid #fecaca;
+    border-radius: 8px; padding: 10px 16px; margin-bottom: 14px;
+    align-items: center; gap: 12px; font-size: 13px; color: #dc2626; font-weight: 500;
+  }
+  #delete-bar.visible { display: flex; }
+</style>
+
+<div class="gr-wrap">
+
+  <div class="gr-toolbar">
+    <a href="{% url 'reports' %}" class="gr-btn back">← Back to Reports</a>
+    <input type="text" id="gr-search" class="gr-search" placeholder="Search by filters, date...">
+    <select id="gr-status-filter" class="gr-filter">
+      <option value="">All Statuses</option>
+      <option value="QUEUED">Queued</option>
+      <option value="PROCESSING">Processing</option>
+      <option value="DONE">Done</option>
+      <option value="FAILED">Failed</option>
+    </select>
+    <select id="gr-date-filter" class="gr-filter">
+      <option value="">All Time</option>
+      <option value="today">Today</option>
+      <option value="week">This Week</option>
+      <option value="month">This Month</option>
+    </select>
+  </div>
+
+  <!-- Bulk delete bar -->
+  <div id="delete-bar">
+    <span id="delete-count">0 selected</span>
+    <form method="POST" action="{% url 'delete_reports' %}" id="bulk-delete-form">
+      {% csrf_token %}
+      <div id="delete-hidden-inputs"></div>
+      <button type="submit" class="gr-btn delete" onclick="return confirm('Delete selected reports? This cannot be undone.')">
+        🗑 Delete Selected
+      </button>
+    </form>
+  </div>
+
+  {% if reports %}
+  <table class="gr-table" id="gr-table">
+    <thead>
+      <tr>
+        <th class="cb-col"><input type="checkbox" id="select-all" title="Select all"></th>
+        <th>#</th>
+        <th>Requested At</th>
+        <th>Filters Applied</th>
+        <th>Status</th>
+        <th>Completed At</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for report in reports %}
+      <tr data-status="{{ report.status }}" data-created="{{ report.created_at|date:'Y-m-d' }}">
+        <td class="cb-col">
+          <input type="checkbox" class="row-cb" value="{{ report.id }}">
+        </td>
+        <td style="font-weight:600;color:#1e40af;">#{{ report.id }}</td>
+        <td style="white-space:nowrap;font-size:12px;">{{ report.created_at|date:"Y-m-d H:i" }}</td>
+        <td style="font-size:12px;">
+          {% for k, v in report.filters.items %}
+            {% if v %}<span style="display:inline-block;background:#e0e7ff;color:#3730a3;padding:2px 7px;border-radius:10px;font-size:11px;margin:1px;">{{ k }}: {{ v }}</span>{% endif %}
+          {% endfor %}
+          {% if not report.filters %}
+            <span style="color:#94a3b8;">No filters</span>
+          {% endif %}
+        </td>
+        <td>
+          {% if report.status == 'QUEUED' %}
+            <span class="s-pill p-queued">⏳ Queued</span>
+          {% elif report.status == 'PROCESSING' %}
+            <span class="s-pill p-processing">⚙ Processing...</span>
+          {% elif report.status == 'DONE' %}
+            <span class="s-pill p-done">✅ Done</span>
+          {% elif report.status == 'FAILED' %}
+            <span class="s-pill p-failed" title="{{ report.error }}">❌ Failed</span>
+          {% endif %}
+        </td>
+        <td style="font-size:12px;white-space:nowrap;">
+          {{ report.completed_at|date:"Y-m-d H:i"|default:"—" }}
+        </td>
+        <td>
+          <div style="display:flex;gap:6px;align-items:center;">
+            {% if report.status == 'DONE' %}
+              <a href="{% url 'download_report' report.id %}" class="gr-btn dload">
+                ⬇ Download
+              </a>
+            {% else %}
+              <span style="color:#94a3b8;font-size:12px;">
+                {% if report.status == 'QUEUED' or report.status == 'PROCESSING' %}
+                  Preparing...
+                {% else %}
+                  Unavailable
+                {% endif %}
+              </span>
+            {% endif %}
+            <form method="POST" action="{% url 'delete_reports' %}" style="display:inline;" onsubmit="return confirm('Delete this report?')">
+              {% csrf_token %}
+              <input type="hidden" name="report_ids" value="{{ report.id }}">
+              <button type="submit" class="gr-btn delete" style="padding:4px 10px;font-size:11px;">🗑</button>
+            </form>
+          </div>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div class="empty-state">
+    <div style="font-size:48px;">📭</div>
+    <div style="margin-top:12px;font-size:16px;font-weight:600;color:#475569;">No reports yet</div>
+    <div style="color:#94a3b8;margin-top:4px;">Go to Reports and click Generate Excel to create one.</div>
+    <a href="{% url 'reports' %}" style="display:inline-block;margin-top:16px;" class="gr-btn back">Go to Reports</a>
+  </div>
+  {% endif %}
+
+</div>
+
+<script>
+$(function(){
+
+  // Search filter
+  $('#gr-search').on('input', filterTable);
+  $('#gr-status-filter').on('change', filterTable);
+  $('#gr-date-filter').on('change', filterTable);
+
+  function filterTable() {
+    var search   = $('#gr-search').val().toLowerCase();
+    var status   = $('#gr-status-filter').val();
+    var dateVal  = $('#gr-date-filter').val();
+    var today    = new Date();
+
+    $('#gr-table tbody tr').each(function() {
+      var rowText   = $(this).text().toLowerCase();
+      var rowStatus = $(this).data('status');
+      var rowDate   = new Date($(this).data('created'));
+      var show      = true;
+
+      if (search && rowText.indexOf(search) === -1) show = false;
+      if (status && rowStatus !== status) show = false;
+
+      if (dateVal === 'today') {
+        var t = new Date(); t.setHours(0,0,0,0);
+        if (rowDate < t) show = false;
+      } else if (dateVal === 'week') {
+        var w = new Date(); w.setDate(w.getDate() - 7);
+        if (rowDate < w) show = false;
+      } else if (dateVal === 'month') {
+        var m = new Date(); m.setDate(m.getDate() - 30);
+        if (rowDate < m) show = false;
+      }
+
+      $(this).toggle(show);
+    });
+  }
+
+  // Select all checkbox
+  $('#select-all').on('change', function(){
+    var checked = $(this).is(':checked');
+    $('.row-cb:visible').prop('checked', checked);
+    updateDeleteBar();
+  });
+
+  // Individual checkbox
+  $(document).on('change', '.row-cb', updateDeleteBar);
+
+  function updateDeleteBar() {
+    var selected = $('.row-cb:checked');
+    var count = selected.length;
+    if (count > 0) {
+      $('#delete-count').text(count + ' selected');
+      // Build hidden inputs for bulk delete
+      var inputs = '';
+      selected.each(function(){
+        inputs += '<input type="hidden" name="report_ids" value="' + $(this).val() + '">';
+      });
+      $('#delete-hidden-inputs').html(inputs);
+      $('#delete-bar').addClass('visible');
+    } else {
+      $('#delete-bar').removeClass('visible');
+    }
+  }
+
+  // Auto-refresh every 10s if any report is queued or processing
+  var hasActive = {% if reports %}
+    {{ reports|length }} > 0 && (
+      {% for r in reports %}'{{ r.status }}' === 'QUEUED' || '{{ r.status }}' === 'PROCESSING' {% if not forloop.last %} || {% endif %}{% endfor %}
+    )
+  {% else %}false{% endif %};
+
+  if (hasActive) {
+    setTimeout(function(){ location.reload(); }, 10000);
+  }
+
+});
+</script>
+{% endblock %}

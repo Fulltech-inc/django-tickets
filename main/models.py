@@ -12,6 +12,22 @@ import logging
 logger = logging.getLogger(__name__)
 
 
+class Category(models.Model):
+    name = models.CharField('Category Name', max_length=100)
+    parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='subcategories')
+    is_active = models.BooleanField(default=True)
+    created = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        verbose_name_plural = 'Categories'
+        ordering = ['name']
+    
+    def __str__(self):
+        if self.parent:
+            return f"{self.parent.name} > {self.name}"
+        return self.name
+
+
 class Ticket(models.Model):
     STATUS_CHOICES = (
         ('TODO', 'TODO'),
@@ -32,6 +48,16 @@ class Ticket(models.Model):
     escalation_count = models.IntegerField(default=0)
     last_escalation_check = models.DateTimeField(null=True, blank=True)
     last_escalation_at = models.DateTimeField(null=True, blank=True)
+    category = models.ForeignKey(
+        Category, on_delete=models.SET_NULL, null=True, blank=True,
+        verbose_name='Main Category', related_name='main_tickets',
+        limit_choices_to={'parent': None}
+    )
+    sub_category = models.ForeignKey(
+        Category, on_delete=models.SET_NULL, null=True, blank=True,
+        verbose_name='Sub Category', related_name='sub_tickets'
+    )
+
 
     def __str__(self):
         return f"Ticket #{self.id}: {self.title}"
@@ -220,3 +246,29 @@ class TicketActivity(models.Model):
     
     def __str__(self):
         return f"{self.action} on Ticket #{self.ticket.id} by {self.performed_by} at {self.created_at}"
+
+
+class GeneratedReport(models.Model):
+    STATUS_CHOICES = (
+        ('QUEUED', 'Queued'),
+        ('PROCESSING', 'Processing'),
+        ('DONE', 'Done'),
+        ('FAILED', 'Failed'),
+    )
+    requested_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='QUEUED')
+    filters = models.JSONField(default=dict)  # store what filters were applied
+    file = models.FileField(upload_to='reports/', null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    completed_at = models.DateTimeField(null=True, blank=True)
+    error = models.TextField(blank=True, null=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = 'Generated Report'
+
+    def __str__(self):
+        return f"Report #{self.id} by {self.requested_by} — {self.status}"
+
+
+

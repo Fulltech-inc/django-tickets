@@ -13,20 +13,17 @@
 
 <script type="text/javascript">
     $(document).ready(function() {
-        $('#archived').DataTable({
-            order: [[0, 'desc']]
-        });
+        $('#archived').DataTable({ order: [[0, 'desc']] });
     });
 </script>
 
 <div class="row">
     <div class="col-lg-12">
-
-        <a href="{% url 'ticket_new' %}">
+        <!--a href="{% url 'ticket_new' %}">
             <button type="button" class="btn btn-primary" style="float: right; margin-top: -50px; margin-right: 20px;">
                 Create New Ticket
             </button>
-        </a>
+        </a--->
 
         <div class="page-header"><h1>Closed Tickets</h1></div>
 
@@ -36,19 +33,22 @@
                     <th>ID</th>
                     <th>Owner</th>
                     <th>Assignee</th>
+                    <th>Main Category</th>
+                    <th>Sub Category</th>
                     <th>Title</th>
                     <th>Description</th>
                     <th>Closed</th>
                     <th>Created At</th>
                 </tr>
             </thead>
-
             <tbody>
                 {% for ticket in tickets %}
                 <tr>
                     <td><a href="{% url 'ticket_detail' pk=ticket.id %}">{{ ticket.id }}</a></td>
                     <td>{{ ticket.owner }}</td>
-                    <td>{{ ticket.assigned_to }}</td>
+                    <td>{{ ticket.assigned_to|default:"---" }}</td>
+                    <td>{{ ticket.category.name|default:"---" }}</td>
+                    <td>{{ ticket.sub_category.name|default:"---" }}</td>
                     <td>{{ ticket.title }}</td>
                     <td>{{ ticket.description }}</td>
                     <td>{{ ticket.closed_date|date:"d.m.Y, G:i" }}</td>
@@ -57,8 +57,6 @@
                 {% endfor %}
             </tbody>
         </table>
-
     </div>
 </div>
-
 {% endblock %}

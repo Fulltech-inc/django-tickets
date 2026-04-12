@@ -42,7 +42,15 @@ urlpatterns = [
     path('escalations/<int:pk>/acknowledge/', escalation_acknowledge_view, name='escalation_acknowledge'),
     path('escalations/<int:pk>/resolve/', escalation_resolve_view, name='escalation_resolve'),
 
+    # REPORTS
     path('reports/', login_required(main.views.reports_view), name='reports'),
+    path('reports/export/csv', login_required(main.views.export_reports_excel), name='reports_export'),
+    path('reports/export/pdf/', login_required(main.views.export_reports_pdf), name='reports_export_pdf'),
+    path('ajax/subcategories/', main.views.get_subcategories, name='get_subcategories'),
+    path('reports/queue/', login_required(main.views.queue_report_view), name='queue_report'),
+    path('reports/generated/', login_required(main.views.generated_reports_view), name='generated_reports'),
+    path('reports/download/<int:pk>/', login_required(main.views.download_report_view), name='download_report'),
+    path('reports/delete/', login_required(main.views.delete_reports_view), name='delete_reports'),
 
 
 

@@ -1,6 +1,6 @@
 {% extends "main/base.html" %}
 
-{% block header_icon %}<i class="fa fa-pencil-square-o fa-5x"></i>{% endblock %}
+{% block header_icon %}<i class="fa fa-ticket fa-5x"></i>{% endblock %}
 {% block headline %}Ticket #{{ticket.id}}{% endblock %}
 {% block head-message %}Everything you need to know about this ticket{% endblock %}
 
@@ -8,31 +8,73 @@
 
 {% block content %}
 
-<div class="dropdown" style="float: right; margin-top: -50px; margin-right: 20px;">
-  <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-expanded="true">
-    Actions
-    <span class="caret"></span>
-  </button>
-  <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
-      <li role="presentation"><a role="menuitem" tabindex="-1" href="{% url 'ticket_edit' pk=ticket.id %}" id="edit_ticket">Edit ticket</a></li>
-      <li role="presentation"><a role="menuitem" tabindex="-1" href="{% url 'attachment_new' %}?ticket={{ ticket.id }}" id="add_attachment">Add attachment</a></li>
-      <li role="presentation"><a role="menuitem" tabindex="-1" href="{% url 'followup_new' %}?ticket={{ ticket.id }}" id="add-followup">Add followup</a></li>
-  </ul>
-</div>
+<style>
+  .description { background: #EEE; }
+  .ticket-title-bar {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 18px;
+  }
+  .ticket-title-bar h1 { margin: 0; font-size: 22px; }
 
-<div class="page-header"><h1>Ticket #{{ ticket.id }}</h1></div>
+  .btn-actions {
+    background: #F47C20;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .btn-actions:hover { background: #d96a10; color: white; }
+  .btn-actions .caret { margin-left: 6px; }
+
+  .dropdown-menu { border-radius: 6px; box-shadow: 0 4px 16px rgba(0,0,0,.12); }
+  .dropdown-menu li a { font-size: 13px; padding: 8px 16px; }
+  .dropdown-menu li a:hover { background: #FEF0E3; color: #F47C20; }
+</style>
+
+<!-- Title bar with action button inline -->
+<div class="ticket-title-bar">
+  <h1>Ticket #{{ ticket.id }}</h1>
+
+  <div class="dropdown">
+    <button class="btn-actions dropdown-toggle" type="button" id="dropdownMenu1"
+            data-toggle="dropdown" aria-expanded="true">
+      Actions <span class="caret"></span>
+    </button>
+    <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
+      <li role="presentation">
+        <a role="menuitem" href="{% url 'ticket_edit' pk=ticket.id %}">
+          <i class="fa fa-pencil" style="width:16px;"></i> Edit ticket
+        </a>
+      </li>
+      <li role="presentation">
+        <a role="menuitem" href="{% url 'attachment_new' %}?ticket={{ ticket.id }}">
+          <i class="fa fa-paperclip" style="width:16px;"></i> Add attachment
+        </a>
+      </li>
+      <li role="presentation">
+        <a role="menuitem" href="{% url 'followup_new' %}?ticket={{ ticket.id }}">
+          <i class="fa fa-comment" style="width:16px;"></i> Add followup
+        </a>
+      </li>
+    </ul>
+  </div>
+</div>
 
 <div class="row">
     <div class="col-lg-8">
-
-      <style>
-       .description { background: #EEE; }
-      </style>
-
       <table class="table table-bordered">
         <tr>
           <td class="description"><b>Status</b></td>
-          <td>{% if ticket.status == "TODO" %}<span class="label label-danger">TODO</span>{% elif ticket.status == "DONE" %}<span class="label label-success">DONE</span>{% elif ticket.status == "WAITING" %}<span class="label label-warning">WAITING</span>{% elif ticket.status == "IN PROGRESS" %}<span class="label label-default">IN PROGRESS</span>{% endif %}</td>
+          <td>
+            {% if ticket.status == "TODO" %}<span class="label label-danger">TODO</span>
+            {% elif ticket.status == "DONE" %}<span class="label label-success">DONE</span>
+            {% elif ticket.status == "WAITING" %}<span class="label label-warning">WAITING</span>
+            {% elif ticket.status == "IN PROGRESS" %}<span class="label label-default">IN PROGRESS</span>
+            {% endif %}
+          </td>
         </tr>
         <tr>
           <td class="description"><b>Assigned to</b></td>
@@ -43,6 +85,14 @@
           <td>{{ ticket.owner.first_name }} {{ ticket.owner.last_name }}</td>
         </tr>
         <tr>
+          <td class="description"><b>Main Category</b></td>
+          <td>{{ ticket.category.name|default:"---" }}</td>
+        </tr>
+        <tr>
+          <td class="description"><b>Sub Category</b></td>
+          <td>{{ ticket.sub_category.name|default:"---" }}</td>
+        </tr>
+        <tr>
           <td width="180px" class="description"><b>Title</b></td>
           <td>{{ ticket.title }}</td>
         </tr>
@@ -51,103 +101,83 @@
           <td>{{ ticket.description }}</td>
         </tr>
       </table>
-
     </div>
-    <div class="col-lg-4">
 
+    <div class="col-lg-4">
       {% if attachments %}
       <h2>Attachments</h2>
       <ul>
-          {% for attachment in attachments %}
-          <li><a href="{{ attachment.safe_url }}">{{ attachment.filename }}</a></li>
-          {% endfor %}
+        {% for attachment in attachments %}
+        <li><a href="{{ attachment.safe_url }}">{{ attachment.filename }}</a></li>
+        {% endfor %}
       </ul>
       {% endif %}
-
-    </div><!-- Ende column -->
-</div><!-- Ende row -->
+    </div>
+</div>
 
 <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/plug-ins/9dcbecd42ad/integration/bootstrap/3/dataTables.bootstrap.css">
-
-<script type="text/javascript" language="javascript" src="//cdn.datatables.net/1.10.4/js/jquery.dataTables.min.js"></script>
-
-<script type="text/javascript" language="javascript" src="//cdn.datatables.net/plug-ins/9dcbecd42ad/integration/bootstrap/3/dataTables.bootstrap.js"></script>
-
-<script type="text/javascript" charset="utf-8">
-    $(document).ready(function() {
-        $('#followups').dataTable();
-    });
+<script type="text/javascript" src="//cdn.datatables.net/1.10.4/js/jquery.dataTables.min.js"></script>
+<script type="text/javascript" src="//cdn.datatables.net/plug-ins/9dcbecd42ad/integration/bootstrap/3/dataTables.bootstrap.js"></script>
+<script>
+  $(document).ready(function() { $('#followups').dataTable(); });
 </script>
-<!-- Activity Log -->
+
 <h2>Activity Log</h2>
 {% if activities %}
 <table class="table table-striped table-bordered" width="100%">
-    <thead>
-        <tr>
-            <th width="150px">Date/Time</th>
-            <th width="120px">Action</th>
-            <th width="120px">Performed By</th>
-            <th>Details</th>
-        </tr>
-    </thead>
-    <tbody>
-    {% for activity in activities %}
+  <thead>
     <tr>
-        <td>{{ activity.created_at|date:"Y-m-d H:i:s" }}</td>
-        <td>{{ activity.get_action_display }}</td>
-        <td>{{ activity.performed_by }}</td>
-        <td>
-            {% if activity.from_department %}
-                From: {{ activity.from_department }}<br>
-            {% endif %}
-            {% if activity.to_department %}
-                To: {{ activity.to_department }}<br>
-            {% endif %}
-            {% if activity.old_value %}
-                Old: {{ activity.old_value }}<br>
-            {% endif %}
-            {% if activity.new_value %}
-                New: {{ activity.new_value }}<br>
-            {% endif %}
-            {% if activity.comment %}
-                {{ activity.comment }}
-            {% endif %}
-        </td>
+      <th width="150px">Date/Time</th>
+      <th width="120px">Action</th>
+      <th width="120px">Performed By</th>
+      <th>Details</th>
     </tr>
-    {% endfor %}
-    </tbody>
+  </thead>
+  <tbody>
+  {% for activity in activities %}
+  <tr>
+    <td>{{ activity.created_at|date:"Y-m-d H:i:s" }}</td>
+    <td>{{ activity.get_action_display }}</td>
+    <td>{{ activity.performed_by }}</td>
+    <td>
+      {% if activity.from_department %}From: {{ activity.from_department }}<br>{% endif %}
+      {% if activity.to_department %}To: {{ activity.to_department }}<br>{% endif %}
+      {% if activity.old_value %}Old: {{ activity.old_value }}<br>{% endif %}
+      {% if activity.new_value %}New: {{ activity.new_value }}<br>{% endif %}
+      {% if activity.comment %}{{ activity.comment }}{% endif %}
+    </td>
+  </tr>
+  {% endfor %}
+  </tbody>
 </table>
 {% else %}
-    <p>No activities recorded yet...</p>
+  <p>No activities recorded yet...</p>
 {% endif %}
 
 <h2>Followups</h2>
 {% if followups %}
 <table id="followups" class="table table-striped table-bordered" cellspacing="0" width="100%">
-    <thead>
+  <thead>
     <tr>
-        <th width="10px"></th>
-        <th width="150px">User</th>
-        <th>Text</th>
-        <th width="100px">Modified</th>
+      <th width="10px"></th>
+      <th width="150px">User</th>
+      <th>Text</th>
+      <th width="100px">Modified</th>
     </tr>
-    </thead>
-    <tbody>
-    {% for followup in followups %}
-    <tr>
-      <td>
-          <a href="{% url 'followup_edit' pk=followup.id %}"><i class="fa fa-pencil-square-o"></i></a>
-      </td>
-      <td>{{ followup.user.first_name }} {{ followup.user.last_name }}</td>
-      <td>{{ followup.text }}</td>
-      <td>{{ followup.modified|date:"d.m.Y, G:i" }}</td>
-    </tr>
-    {% endfor %}
-    </tbody>
+  </thead>
+  <tbody>
+  {% for followup in followups %}
+  <tr>
+    <td><a href="{% url 'followup_edit' pk=followup.id %}"><i class="fa fa-pencil-square-o"></i></a></td>
+    <td>{{ followup.user.first_name }} {{ followup.user.last_name }}</td>
+    <td>{{ followup.text }}</td>
+    <td>{{ followup.modified|date:"d.m.Y, G:i" }}</td>
+  </tr>
+  {% endfor %}
+  </tbody>
 </table>
-
 {% else %}
-    <p>no followup so far...</p>
+  <p>No followups so far...</p>
 {% endif %}
 
 {% endblock %}

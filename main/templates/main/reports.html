@@ -5,135 +5,516 @@
 {% block head-message %}Ticket analytics and statistics{% endblock %}
 
 {% block content %}
-<div class="row">
-    <div class="col-lg-12">
-        <!-- Date Range Filter -->
-        <div class="panel panel-default">
-            <div class="panel-heading">
-                <h3 class="panel-title">Filter Tickets by Date</h3>
-            </div>
-            <div class="panel-body">
-                <form method="GET" class="form-inline">
-                    <div class="form-group">
-                        <label>Start Date</label>
-                        <input type="date" name="start_date" class="form-control" value="{{ start_date|date:'Y-m-d' }}">
-                    </div>
-                    <div class="form-group">
-                        <label>End Date</label>
-                        <input type="date" name="end_date" class="form-control" value="{{ end_date|date:'Y-m-d' }}">
-                    </div>
-                    <div class="form-group">
-                        <label>Status</label>
-                        <select name="status" class="form-control">
-                            <option value="">All</option>
-                            {% for code, label in status_choices %}
-                            <option value="{{ code }}" {% if status_filter == code %}selected{% endif %}>{{ label }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Generate Report</button>
-                </form>
-            </div>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap');
+
+  .rpt-wrap { font-family: 'IBM Plex Sans', sans-serif; }
+
+  .kpi-row { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 24px; }
+  .kpi-card {
+    flex: 1 1 140px; border-radius: 8px; padding: 18px 20px 14px;
+    background: #fff; border: 1px solid #e2e8f0; box-shadow: 0 1px 4px rgba(0,0,0,.06);
+  }
+  .kpi-card .kpi-label { font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: #64748b; }
+  .kpi-card .kpi-value { font-family: 'IBM Plex Mono', monospace; font-size: 36px; font-weight: 600; line-height: 1.1; margin: 6px 0 0; color: #0f172a; }
+  .kpi-card .kpi-sub  { font-size: 11px; color: #94a3b8; margin-top: 4px; }
+  .kpi-card.danger  { border-left: 4px solid #ef4444; }
+  .kpi-card.success { border-left: 4px solid #22c55e; }
+  .kpi-card.warning { border-left: 4px solid #f59e0b; }
+  .kpi-card.info    { border-left: 4px solid #3b82f6; }
+
+  .filter-bar {
+    background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px;
+    padding: 18px 20px; margin-bottom: 24px;
+  }
+  .filter-bar .filter-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; }
+  .filter-group { display: flex; flex-direction: column; gap: 4px; min-width: 140px; flex: 1; }
+  .filter-group label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: #64748b; }
+  .filter-group select,
+  .filter-group input { border: 1px solid #cbd5e1; border-radius: 6px; padding: 7px 10px; font-size: 13px; background: #fff; color: #0f172a; height: 36px; }
+
+  .btn-export {
+    background: #fff; border: 1px solid #cbd5e1; border-radius: 6px;
+    padding: 7px 14px; font-size: 12px; font-weight: 600; cursor: pointer; height: 36px;
+    color: #374151; text-decoration: none; display: inline-flex; align-items: center; gap: 5px;
+  }
+  .btn-export.excel  { border-color: #16a34a; color: #16a34a; }
+  .btn-export.pdf    { border-color: #dc2626; color: #dc2626; }
+  .btn-export.queue  { border-color: #7c3aed; color: #7c3aed; }
+  .btn-export.my-rpt { border-color: #0891b2; color: #0891b2; }
+  .btn-export:hover  { opacity: .85; text-decoration: none; }
+  .btn-reset { background: none; border: 1px solid #e2e8f0; border-radius: 6px;
+               padding: 7px 12px; font-size: 13px; color: #64748b; cursor: pointer; height: 36px; text-decoration: none; }
+
+  .quick-pills { display: flex; gap: 6px; margin-bottom: 12px; }
+  .quick-pill {
+    padding: 4px 12px; border-radius: 20px; border: 1px solid #e2e8f0;
+    background: #fff; font-size: 12px; font-weight: 500; cursor: pointer; color: #475569;
+  }
+  .quick-pill.active,
+  .quick-pill:hover { background: #1e40af; color: #fff; border-color: #1e40af; }
+
+  .tab-nav { display: flex; gap: 0; border-bottom: 2px solid #e2e8f0; margin-bottom: 20px; }
+  .tab-btn {
+    padding: 10px 20px; font-size: 13px; font-weight: 600; cursor: pointer;
+    border: none; background: none; color: #64748b; border-bottom: 2px solid transparent;
+    margin-bottom: -2px; transition: all .15s;
+  }
+  .tab-btn.active { color: #1e40af; border-bottom-color: #1e40af; }
+  .tab-btn:hover:not(.active) { color: #374151; background: #f8fafc; }
+  .tab-pane { display: none; }
+  .tab-pane.active { display: block; }
+
+  .rpt-table-wrap { overflow-x: auto; }
+  .rpt-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .rpt-table thead th {
+    background: #f1f5f9; font-weight: 600; font-size: 11px; text-transform: uppercase;
+    letter-spacing: .05em; color: #64748b; padding: 10px 12px; border-bottom: 1px solid #e2e8f0;
+    white-space: nowrap;
+  }
+  .rpt-table tbody td { padding: 9px 12px; border-bottom: 1px solid #f1f5f9; color: #1e293b; vertical-align: middle; }
+  .rpt-table tbody tr:hover { background: #f8fafc; }
+
+  .s-pill { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; }
+  .s-todo    { background: #fee2e2; color: #dc2626; }
+  .s-inprog  { background: #e0e7ff; color: #4338ca; }
+  .s-waiting { background: #fef3c7; color: #d97706; }
+  .s-done    { background: #dcfce7; color: #16a34a; }
+  .s-none    { background: #f1f5f9; color: #64748b; }
+  .esc-1     { background: #fef3c7; color: #d97706; }
+  .esc-2     { background: #fee2e2; color: #dc2626; }
+
+  .mini-bar { background: #e2e8f0; border-radius: 4px; height: 8px; width: 90px; overflow: hidden; }
+  .mini-bar-fill { background: #22c55e; height: 100%; border-radius: 4px; }
+
+  .stat-bar-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid #f1f5f9; }
+  .stat-bar-label { width: 110px; font-size: 12px; font-weight: 600; }
+  .stat-bar-track { flex: 1; background: #e2e8f0; height: 14px; border-radius: 7px; overflow: hidden; }
+  .stat-bar-fill  { height: 100%; border-radius: 7px; }
+  .stat-bar-count { width: 50px; text-align: right; font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #374151; }
+  .fill-todo    { background: #ef4444; }
+  .fill-inprog  { background: #6366f1; }
+  .fill-waiting { background: #f59e0b; }
+  .fill-done    { background: #22c55e; }
+
+  .cat-row { display: flex; align-items: center; gap: 10px; padding: 7px 0; }
+  .cat-name { width: 150px; font-size: 12px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .cat-bar-track { flex: 1; background: #e2e8f0; height: 10px; border-radius: 5px; overflow: hidden; }
+  .cat-bar-fill  { background: #3b82f6; height: 100%; border-radius: 5px; }
+  .cat-count { width: 36px; text-align: right; font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #374151; }
+
+  .sla-header { background: #fff7ed; border: 1px solid #fed7aa; border-radius: 8px 8px 0 0; padding: 12px 16px; display: flex; align-items: center; gap: 8px; }
+  .sla-title  { font-weight: 700; color: #c2410c; font-size: 14px; }
+
+  .empty-state { text-align: center; padding: 48px 0; color: #94a3b8; font-size: 14px; }
+
+  /* Queue toast */
+  #queue-toast {
+    display: none; position: fixed; bottom: 24px; right: 24px; z-index: 9999;
+    background: #1e40af; color: #fff; padding: 14px 20px; border-radius: 10px;
+    font-size: 14px; font-weight: 500; box-shadow: 0 4px 20px rgba(0,0,0,.2);
+    max-width: 340px; line-height: 1.5;
+  }
+  #queue-toast.success { background: #16a34a; }
+  #queue-toast.error   { background: #dc2626; }
+</style>
+
+<div id="queue-toast"></div>
+
+<div class="rpt-wrap">
+
+  <!-- FILTER BAR -->
+  <form method="GET" id="filter-form" action="{% url 'reports' %}">
+    <div class="filter-bar">
+      <div class="quick-pills">
+        <span class="quick-pill {% if date_filter == 'all' %}active{% endif %}"   data-val="all">All Time</span>
+        <span class="quick-pill {% if date_filter == 'today' %}active{% endif %}"  data-val="today">Today</span>
+        <span class="quick-pill {% if date_filter == 'week' %}active{% endif %}"   data-val="week">Last 7 Days</span>
+        <span class="quick-pill {% if date_filter == 'month' %}active{% endif %}"  data-val="month">Last 30 Days</span>
+      </div>
+      <input type="hidden" name="date_filter" id="date_filter_input" value="{{ date_filter|default:'all' }}">
+
+      <div class="filter-row">
+        <div class="filter-group">
+          <label>Start Date</label>
+          <input type="date" name="start_date" value="{{ start_date|date:'Y-m-d' }}">
         </div>
-        
-        <!-- Summary Cards -->
-        <div class="row">
-            <div class="col-md-3">
-                <div class="panel panel-primary">
-                    <div class="panel-heading">Total Tickets</div>
-                    <div class="panel-body">
-                        <h2>{{ tickets|length|default:"0" }}</h2>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="panel panel-success">
-                    <div class="panel-heading">Avg Resolution Time</div>
-                    <div class="panel-body">
-                        <h2>{{ avg_resolution|default:"N/A" }}</h2>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="panel panel-danger">
-                    <div class="panel-heading">SLA Breaches</div>
-                    <div class="panel-body">
-                        <h2>{{ sla_breaches|length }}</h2>
-                    </div>
-                </div>
-            </div>
+        <div class="filter-group">
+          <label>End Date</label>
+          <input type="date" name="end_date" value="{{ end_date|date:'Y-m-d' }}">
         </div>
-        
-        <!-- Status Summary -->
-        <div class="panel panel-default">
-            <div class="panel-heading">
-                <h3 class="panel-title">Tickets by Status</h3>
-            </div>
-            <div class="panel-body">
-                <table class="table table-bordered">
-                    <thead>
-                        <tr><th>Status</th><th>Count</th></tr>
-                    </thead>
-                    <tbody>
-                        {% for item in status_summary %}
-                        <tr><td>{{ item.status|default:"No Status" }}</td><td>{{ item.count }}</td></tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
+        <div class="filter-group">
+          <label>Status</label>
+          <select name="status">
+            <option value="">All Statuses</option>
+            {% for code, label in status_choices %}
+            <option value="{{ code }}" {% if status_filter == code %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
         </div>
-        
-        <!-- Department Summary -->
-        <div class="panel panel-default">
-            <div class="panel-heading">
-                <h3 class="panel-title">Tickets by Department/Assignee</h3>
-            </div>
-            <div class="panel-body">
-                <table class="table table-bordered">
-                    <thead>
-                        <tr><th>Assignee</th><th>Total</th><th>Open</th><th>Closed</th></tr>
-                    </thead>
-                    <tbody>
-                        {% for item in dept_summary %}
-                        <tr>
-                            <td>{{ item.assigned_to__first_name }} {{ item.assigned_to__last_name|default:item.assigned_to__username|default:"Unassigned" }}</td>
-                            <td>{{ item.total }}</td>
-                            <td>{{ item.open }}</td>
-                            <td>{{ item.closed }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
+        <div class="filter-group">
+          <label>Category</label>
+          <select name="category">
+            <option value="">All Categories</option>
+            {% for cat in categories %}
+            <option value="{{ cat.id }}" {% if category_filter == cat.id|stringformat:"s" %}selected{% endif %}>{{ cat.name }}</option>
+            {% endfor %}
+          </select>
         </div>
-        
-        <!-- Filtered Tickets List -->
-        {% if tickets %}
-        <div class="panel panel-default">
-            <div class="panel-heading">
-                <h3 class="panel-title">Ticket Details ({{ start_date }} to {{ end_date }})</h3>
-            </div>
-            <div class="panel-body">
-                <table class="table table-striped">
-                    <thead>
-                        <tr><th>ID</th><th>Title</th><th>Status</th><th>Assignee</th><th>Created</th><th>Closed</th></tr>
-                    </thead>
-                    <tbody>
-                        {% for ticket in tickets %}
-                        <tr>
-                            <td><a href="{% url 'ticket_detail' ticket.id %}">{{ ticket.id }}</a></td>
-                            <td>{{ ticket.title }}</td>
-                            <td>{{ ticket.status }}</td>
-                            <td>{{ ticket.assigned_to }}</td>
-                            <td>{{ ticket.created|date:"Y-m-d H:i" }}</td>
-                            <td>{{ ticket.closed_date|date:"Y-m-d H:i"|default:"-" }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
+        <div class="filter-group">
+          <label>Assignee</label>
+          <select name="assigned_to">
+            <option value="">All Assignees</option>
+            {% for user in users %}
+            <option value="{{ user.id }}" {% if assigned_to_filter == user.id|stringformat:"s" %}selected{% endif %}>{{ user.get_full_name|default:user.username }}</option>
+            {% endfor %}
+          </select>
         </div>
-        {% endif %}
+        <div style="display:flex;gap:6px;align-items:flex-end;flex-wrap:wrap;">
+          <a href="{% url 'reports' %}" class="btn-reset">Reset</a>
+          <!--a href="{% url 'reports_export_pdf' %}?{{ request.GET.urlencode }}" class="btn-export pdf">&#128209; Export PDF</a-->
+          <button type="button" id="queue-btn" class="btn-export queue" onclick="queueReport()">
+            &#128196; Generate Excel
+          </button>
+          <a href="{% url 'generated_reports' %}" class="btn-export my-rpt">
+            &#128203; My Reports
+          </a>
+        </div>
+      </div>
     </div>
+  </form>
+
+  <!-- KPI CARDS -->
+  <div class="kpi-row">
+    <div class="kpi-card info">
+      <div class="kpi-label">Total Tickets</div>
+      <div class="kpi-value">{{ total_tickets }}</div>
+      <div class="kpi-sub">in selected period</div>
+    </div>
+    <div class="kpi-card warning">
+      <div class="kpi-label">Open</div>
+      <div class="kpi-value">{{ open_tickets }}</div>
+      <div class="kpi-sub">not yet resolved</div>
+    </div>
+    <div class="kpi-card success">
+      <div class="kpi-label">Closed</div>
+      <div class="kpi-value">{{ closed_tickets }}</div>
+      <div class="kpi-sub">resolved tickets</div>
+    </div>
+    <div class="kpi-card" style="border-left:4px solid #f97316;">
+      <div class="kpi-label">Escalated</div>
+      <div class="kpi-value">{{ escalated_count }}</div>
+      <div class="kpi-sub">with escalations</div>
+    </div>
+  </div>
+
+  <!-- TABS -->
+  <div class="tab-nav">
+    <button class="tab-btn active" data-tab="overview">📊 Overview</button>
+    <button class="tab-btn" data-tab="department">👥 By Department</button>
+    <button class="tab-btn" data-tab="tickets">🎫 Ticket Details</button>
+    <button class="tab-btn" data-tab="sla">⚠ Escalated Tickets</button>
+  </div>
+
+  <!-- TAB: OVERVIEW -->
+  <div id="tab-overview" class="tab-pane active">
+    <div class="row">
+      <div class="col-md-6">
+        <div class="panel panel-default">
+          <div class="panel-heading"><h4 class="panel-title">Status Breakdown</h4></div>
+          <div class="panel-body">
+            {% for item in status_summary %}
+            {% with pct=item.count|stringformat:"s" %}
+            <div class="stat-bar-row">
+              <div class="stat-bar-label">
+                {% if item.status == "TODO" %}<span class="s-pill s-todo">TODO</span>
+                {% elif item.status == "IN PROGRESS" %}<span class="s-pill s-inprog">IN PROGRESS</span>
+                {% elif item.status == "WAITING" %}<span class="s-pill s-waiting">WAITING</span>
+                {% elif item.status == "DONE" %}<span class="s-pill s-done">DONE</span>
+                {% else %}<span class="s-pill s-none">{{ item.status }}</span>{% endif %}
+              </div>
+              <div class="stat-bar-track">
+                <div class="stat-bar-fill
+                  {% if item.status == 'TODO' %}fill-todo
+                  {% elif item.status == 'IN PROGRESS' %}fill-inprog
+                  {% elif item.status == 'WAITING' %}fill-waiting
+                  {% else %}fill-done{% endif %}"
+                  style="width:{% if total_tickets %}{% widthratio item.count total_tickets 100 %}{% else %}0{% endif %}%">
+                </div>
+              </div>
+              <div class="stat-bar-count">{{ item.count }}</div>
+            </div>
+            {% endwith %}
+            {% empty %}<div class="empty-state">No data</div>{% endfor %}
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="panel panel-default">
+          <div class="panel-heading"><h4 class="panel-title">Category Breakdown</h4></div>
+          <div class="panel-body">
+            {% for cat in category_summary %}
+            <div class="cat-row">
+              <div class="cat-name" title="{{ cat.category__name|default:'Uncategorized' }}">{{ cat.category__name|default:"Uncategorized" }}</div>
+              <div class="cat-bar-track">
+                <div class="cat-bar-fill" style="width:{% if total_tickets %}{% widthratio cat.count total_tickets 100 %}{% else %}0{% endif %}%"></div>
+              </div>
+              <div class="cat-count">{{ cat.count }}</div>
+            </div>
+            {% empty %}<div class="empty-state">No categories assigned</div>{% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB: DEPARTMENT -->
+  <div id="tab-department" class="tab-pane">
+    <div class="panel panel-default">
+      <div class="panel-heading"><h4 class="panel-title">Tickets by Department / Assignee</h4></div>
+      <div class="panel-body rpt-table-wrap">
+        <table class="rpt-table">
+          <thead>
+            <tr>
+              <th>Assignee</th><th>Total</th><th>TODO</th>
+              <th>In Progress</th><th>Waiting</th><th>Closed</th><th>Completion</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in dept_summary %}
+            <tr>
+              <td>
+                <strong>{{ item.assigned_to__first_name|default:item.assigned_to__username|default:"Unassigned" }}</strong>
+                {% if item.assigned_to__first_name and item.assigned_to__username %}
+                <br><small style="color:#94a3b8;">@{{ item.assigned_to__username }}</small>
+                {% endif %}
+              </td>
+              <td><strong>{{ item.total }}</strong></td>
+              <td><span class="s-pill s-todo">{{ item.todo|default:"0" }}</span></td>
+              <td><span class="s-pill s-inprog">{{ item.in_progress|default:"0" }}</span></td>
+              <td><span class="s-pill s-waiting">{{ item.waiting|default:"0" }}</span></td>
+              <td><span class="s-pill s-done">{{ item.closed }}</span></td>
+              <td>
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <div class="mini-bar">
+                    <div class="mini-bar-fill" style="width:{% if item.total %}{% widthratio item.closed item.total 100 %}{% else %}0{% endif %}%;"></div>
+                  </div>
+                  <span style="font-size:12px;font-family:'IBM Plex Mono',monospace;">
+                    {% if item.total %}{% widthratio item.closed item.total 100 %}{% else %}0{% endif %}%
+                  </span>
+                </div>
+              </td>
+            </tr>
+            {% empty %}<tr><td colspan="7" class="empty-state">No data</td></tr>{% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB: TICKET DETAILS -->
+  <div id="tab-tickets" class="tab-pane">
+    <div class="panel panel-default">
+      <div class="panel-heading" style="display:flex;justify-content:space-between;align-items:center;">
+        <h4 class="panel-title">
+          Ticket Details
+          {% if start_date and end_date %} &mdash; {{ start_date|date:"Y-m-d" }} to {{ end_date|date:"Y-m-d" }}{% endif %}
+        </h4>
+        <span style="font-size:12px;color:#64748b;">{{ tickets|length }} tickets</span>
+      </div>
+      <div class="panel-body rpt-table-wrap">
+        {% if tickets %}
+        <table class="rpt-table" id="report-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Interaction ID</th>
+              <th>Main Category</th>
+              <th>Sub Category</th>
+              <th>Title</th>
+              <th>Status</th>
+              <th>Owner</th>
+              <th>Assignee</th>
+              <th>Created</th>
+              <th>Closed</th>
+              <th>Age</th>
+              <th>Escalation</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for ticket in tickets %}
+            <tr>
+              <td><a href="{% url 'ticket_detail' ticket.id %}" style="font-weight:600;color:#1e40af;">#{{ ticket.id }}</a></td>
+              <td style="font-family:'IBM Plex Mono',monospace;font-size:11px;">{{ ticket.interaction_id|default:"–" }}</td>
+              <td>
+                {% if ticket.category %}
+                  <span style="font-size:11px;background:#dbeafe;color:#1e40af;padding:2px 7px;border-radius:10px;">{{ ticket.category.name }}</span>
+                {% else %}–{% endif %}
+              </td>
+              <td>
+                {% if ticket.sub_category %}
+                  <span style="font-size:11px;background:#ede9fe;color:#7c3aed;padding:2px 7px;border-radius:10px;">{{ ticket.sub_category.name }}</span>
+                {% else %}–{% endif %}
+              </td>
+              <td>{{ ticket.title|truncatechars:50 }}</td>
+              <td>
+                {% if ticket.status == "TODO" %}<span class="s-pill s-todo">TODO</span>
+                {% elif ticket.status == "IN PROGRESS" %}<span class="s-pill s-inprog">IN PROGRESS</span>
+                {% elif ticket.status == "WAITING" %}<span class="s-pill s-waiting">WAITING</span>
+                {% elif ticket.status == "DONE" %}<span class="s-pill s-done">DONE</span>
+                {% else %}<span class="s-pill s-none">{{ ticket.status }}</span>{% endif %}
+              </td>
+              <td>{{ ticket.owner.get_full_name|default:ticket.owner.username|default:"–" }}</td>
+              <td>{{ ticket.assigned_to.get_full_name|default:ticket.assigned_to.username|default:"–" }}</td>
+              <td style="font-size:12px;white-space:nowrap;">{{ ticket.created|date:"Y-m-d H:i" }}</td>
+              <td style="font-size:12px;white-space:nowrap;">{{ ticket.closed_date|date:"Y-m-d H:i"|default:"–" }}</td>
+              <td style="font-size:12px;">{{ ticket.created|timesince }}</td>
+              <td>
+                {% if ticket.escalation_count == 0 %}<span class="s-pill s-none">None</span>
+                {% elif ticket.escalation_count == 1 %}<span class="s-pill esc-1">Lvl 1</span>
+                {% elif ticket.escalation_count >= 2 %}<span class="s-pill esc-2">Lvl {{ ticket.escalation_count }}</span>
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        {% else %}
+        <div class="empty-state">No tickets found for the selected filters.</div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB: ESCALATED TICKETS -->
+  <div id="tab-sla" class="tab-pane">
+    {% if escalated_tickets %}
+    <div class="sla-header">
+      <span class="sla-title">⚠ Escalated Tickets</span>
+    </div>
+    <div class="rpt-table-wrap" style="border:1px solid #fed7aa;border-top:none;border-radius:0 0 8px 8px;">
+      <table class="rpt-table">
+        <thead>
+          <tr>
+            <th>Ticket #</th><th>Title</th>
+            <th>Main Category</th><th>Sub Category</th>
+            <th>Ticket Status</th><th>Assigned To</th>
+            <th>Escalation Level</th><th>Escalated To</th>
+            <th>Escalated From</th><th>Escalated At</th><th>Esc. Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for esc in escalated_tickets %}
+          <tr>
+            <td><a href="{% url 'ticket_detail' esc.ticket.id %}" style="color:#c2410c;font-weight:700;">#{{ esc.ticket.id }}</a></td>
+            <td>{{ esc.ticket.title|truncatechars:40 }}</td>
+            <td>{% if esc.ticket.category %}{{ esc.ticket.category.name }}{% else %}–{% endif %}</td>
+            <td>{% if esc.ticket.sub_category %}{{ esc.ticket.sub_category.name }}{% else %}–{% endif %}</td>
+            <td>
+              {% if esc.ticket.status == "TODO" %}<span class="s-pill s-todo">TODO</span>
+              {% elif esc.ticket.status == "IN PROGRESS" %}<span class="s-pill s-inprog">IN PROGRESS</span>
+              {% elif esc.ticket.status == "WAITING" %}<span class="s-pill s-waiting">WAITING</span>
+              {% elif esc.ticket.status == "DONE" %}<span class="s-pill s-done">DONE</span>{% endif %}
+            </td>
+            <td>{{ esc.ticket.assigned_to|default:"–" }}</td>
+            <td>
+              {% if esc.escalation_level == 1 %}<span class="s-pill esc-1">Level 1</span>
+              {% else %}<span class="s-pill esc-2">Level {{ esc.escalation_level }}</span>{% endif %}
+            </td>
+            <td>{{ esc.escalated_to_user|default:"–" }}</td>
+            <td>{{ esc.escalated_from_user|default:"–" }}</td>
+            <td style="font-size:12px;white-space:nowrap;">{{ esc.escalated_at|date:"Y-m-d H:i" }}</td>
+            <td>
+              {% if esc.status == "PENDING" %}<span class="s-pill s-todo">Pending</span>
+              {% elif esc.status == "ACKNOWLEDGED" %}<span class="s-pill s-waiting">Acknowledged</span>
+              {% elif esc.status == "RESOLVED" %}<span class="s-pill s-done">Resolved</span>{% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="empty-state" style="padding:64px 0;">
+      <div style="font-size:48px;">✅</div>
+      <div style="margin-top:12px;font-size:16px;font-weight:600;color:#16a34a;">No Escalated Tickets</div>
+      <div style="color:#94a3b8;margin-top:4px;">No tickets have been escalated.</div>
+    </div>
+    {% endif %}
+  </div>
+
 </div>
+
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+
+<script>
+$(function(){
+
+  // Tab switching
+  $('.tab-btn').on('click', function(){
+    var t = $(this).data('tab');
+    $('.tab-btn').removeClass('active');
+    $('.tab-pane').removeClass('active');
+    $(this).addClass('active');
+    $('#tab-' + t).addClass('active');
+    if(t === 'tickets' && !$.fn.DataTable.isDataTable('#report-table')){
+      $('#report-table').DataTable({
+        order:[[0,'desc']], pageLength:25,
+        language:{ search:"Search tickets:", lengthMenu:"Show _MENU_", info:"_START_–_END_ of _TOTAL_" }
+      });
+    }
+  });
+
+  // Quick date pills
+  $('.quick-pill').on('click', function(){
+    $('#date_filter_input').val($(this).data('val'));
+    $('#filter-form').submit();
+  });
+
+  // Auto-submit on select changes
+  $('#filter-form select').on('change', function(){
+    $('#filter-form').submit();
+  });
+
+});
+
+function showToast(msg, type) {
+  var toast = document.getElementById('queue-toast');
+  toast.textContent = msg;
+  toast.className = type || '';
+  toast.style.display = 'block';
+  setTimeout(function(){ toast.style.display = 'none'; }, 5000);
+}
+
+function queueReport() {
+  var btn = document.getElementById('queue-btn');
+  btn.textContent = '⏳ Queuing...';
+  btn.style.opacity = '0.6';
+  btn.disabled = true;
+
+  var params = new URLSearchParams(window.location.search);
+
+  fetch("{% url 'queue_report' %}?" + params.toString(), {
+    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(data){
+    btn.textContent = '✅ Queued!';
+    showToast('✅ Report queued successfully! Go to My Reports to download when ready.', 'success');
+    setTimeout(function(){
+      btn.textContent = '📄 Generate Excel';
+      btn.style.opacity = '1';
+      btn.disabled = false;
+    }, 3000);
+  })
+  .catch(function(){
+    btn.textContent = '📄 Generate Excel';
+    btn.style.opacity = '1';
+    btn.disabled = false;
+    showToast('❌ Something went wrong. Please try again.', 'error');
+  });
+}
+</script>
 {% endblock %}

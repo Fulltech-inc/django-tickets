@@ -1,113 +1,157 @@
 {% load static %}
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="shortcut icon" href="{% static 'img/favicon.png' %}">
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="shortcut icon" href="{% static 'img/posb_mock_up.png' %}">
+  <link href="{% static 'bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+  <title>{% block title %}POSB Help Desk{% endblock %}</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
 
-    <!-- Bootstrap CSS -->
-    <link href="{% static 'bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #F5F5F5;
+      color: #1a1a1a;
+      margin: 0;
+      padding-top: 56px;
+    }
 
-    <!-- Font Awesome -->
-    <link href="{% static 'font-awesome/css/font-awesome.min.css' %}" rel="stylesheet">
+    /* ── Navbar ── */
+    .posb-nav {
+      background: #F47C20;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 1000;
+    }
+    .posb-nav-brand {
+      display: flex; align-items: center; gap: 10px; text-decoration: none;
+    }
+    .posb-logo {
+      width: 36px; height: 36px; background: white;
+      border-radius: 8px; display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      font-size: 10px; font-weight: 700; color: #F47C20;
+      line-height: 1.1; letter-spacing: -0.5px;
+    }
+    .posb-nav-title {
+      font-size: 15px; font-weight: 500; color: white; letter-spacing: 0.2px;
+    }
+    .posb-nav-links {
+      display: flex; align-items: center; gap: 2px;
+    }
+    .posb-nav-link {
+      display: flex; align-items: center; gap: 6px;
+      padding: 7px 12px; border-radius: 8px;
+      color: rgba(255,255,255,0.88); font-size: 13px;
+      text-decoration: none; transition: background 0.15s;
+    }
+    .posb-nav-link:hover,
+    .posb-nav-link.active { background: rgba(255,255,255,0.20); color: white; }
+    .posb-nav-link svg { width: 16px; height: 16px; flex-shrink: 0; }
+    .nav-divider { width: 1px; height: 20px; background: rgba(255,255,255,0.25); margin: 0 6px; }
 
-    <!-- HTML5 shim and Respond.js for IE8 support -->
-    <!--[if lt IE 9]>
-      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
-      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
-    <![endif]-->
+    /* ── Page header (replaces jumbotron) ── */
+    .posb-page-header {
+      background: white;
+      border-bottom: 0.5px solid #e8e8e8;
+      padding: 20px 28px 18px;
+      display: flex; align-items: center; gap: 14px;
+    }
+    .page-header-icon {
+      width: 40px; height: 40px; border-radius: 10px;
+      background: #FEF0E3;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .page-header-text h1 { font-size: 18px; font-weight: 500; margin: 0; }
+    .page-header-text p  { font-size: 13px; color: #888; margin: 3px 0 0; }
 
-    <title>{% block title %}{% endblock %}</title>
+    /* ── Content area ── */
+    .posb-content { padding: 24px 28px; max-width: 1280px; margin: 0 auto; }
 
-    <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}" media="screen" />
-    <link rel="stylesheet" type="text/css" href="{% static 'css/print.css' %}" media="print" />
+    /* ── Footer ── */
+    .posb-footer {
+      padding: 18px 28px;
+      border-top: 0.5px solid #e8e8e8;
+      display: flex; justify-content: space-between;
+      font-size: 12px; color: #aaa; background: white; margin-top: 32px;
+    }
+    .posb-footer a { color: #F47C20; text-decoration: none; }
 
-    <script src="{% static 'jquery/jquery-1.11.1.min.js' %}"></script>
+    /* ── Responsive ── */
+    @media (max-width: 768px) {
+      .posb-nav-title { display: none; }
+      .posb-nav-link span { display: none; }
+      .posb-content { padding: 16px; }
+    }
+  </style>
+  <link rel="stylesheet" href="{% static 'css/style.css' %}" media="screen">
+  <link rel="stylesheet" href="{% static 'css/print.css' %}" media="print">
+  <script src="{% static 'jquery/jquery-1.11.1.min.js' %}"></script>
 </head>
 
 <body>
 
-<!-- Navigation -->
-<nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
-    <div class="container">
+<nav class="posb-nav">
+  <a class="posb-nav-brand" href="{% url 'inbox' %}">
+    <div class="posb-logo"><span>PO</span><span>SB</span></div>
+    <span class="posb-nav-title">POSB Ticketing System</span>
+  </a>
 
-        <div class="navbar-header">
-            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-collapse-main">
-                <span class="sr-only">Toggle navigation</span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-            </button>
-            <!-- Brand placeholder -->
-        </div>
-
-        <div class="collapse navbar-collapse" id="navbar-collapse-main">
-            <ul class="nav navbar-nav">
-                <li><a href="{% url 'inbox' %}" title="Inbox"><i class="fa fa-home"></i></a></li>
-                <li><a href="{% url 'all-tickets' %}" title="All Tickets"><i class="fa fa-list"></i></a></li>
-                <li><a href="{% url 'archive' %}" title="Archive"><i class="fa fa-archive"></i></a></li>
-                <li>
-                    <a href="{% url 'escalations' %}" title="Escalations">
-                        <i class="fa fa-exclamation-triangle"></i>
-                    </a>
-                </li>
-                <li>
-                    <a href="{% url 'reports' %}" title="Reports">
-                        <i class="fa fa-bar-chart"></i>
-                    </a>
-                </li>
-            </ul>
-
-            <ul class="nav navbar-nav navbar-right" style="padding-right: 20px;">
-                <li><a href="{% url 'logout' %}" title="Logout"><i class="fa fa-sign-out"></i></a></li>
-            </ul>
-        </div>
-
-    </div>
+  <div class="posb-nav-links">
+    <a class="posb-nav-link {% if request.resolver_match.url_name == 'inbox' %}active{% endif %}" href="{% url 'inbox' %}">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6.5L8 2l6 4.5V14a1 1 0 01-1 1H3a1 1 0 01-1-1V6.5z"/><path d="M6 15V9h4v6"/></svg>
+      <span>Inbox</span>
+    </a>
+    <a class="posb-nav-link {% if request.resolver_match.url_name == 'all-tickets' %}active{% endif %}" href="{% url 'all-tickets' %}">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="12" height="2" rx="1"/><rect x="2" y="7" width="12" height="2" rx="1"/><rect x="2" y="11" width="8" height="2" rx="1"/></svg>
+      <span>All Tickets</span>
+    </a>
+    <a class="posb-nav-link {% if request.resolver_match.url_name == 'archive' %}active{% endif %}" href="{% url 'archive' %}">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="12" height="3" rx="1"/><path d="M3 5v8a1 1 0 001 1h8a1 1 0 001-1V5"/><path d="M6 8h4"/></svg>
+      <span>Archive</span>
+    </a>
+    {% if request.user.is_superuser or request.user.is_staff %}
+    <a class="posb-nav-link {% if request.resolver_match.url_name == 'reports' %}active{% endif %}" href="{% url 'reports' %}">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="10" width="3" height="4" rx="1"/><rect x="6.5" y="6" width="3" height="8" rx="1"/><rect x="11" y="2" width="3" height="12" rx="1"/></svg>
+      <span>Reports</span>
+    </a>
+    {% endif %}
+    <div class="nav-divider"></div>
+    <a class="posb-nav-link" href="{% url 'logout' %}" style="color: rgba(255,255,255,0.7);">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 8H3m4-3l3 3-3 3"/><path d="M6 3H3a1 1 0 00-1 1v8a1 1 0 001 1h3"/></svg>
+      <span>Logout</span>
+    </a>
+  </div>
 </nav>
 
-<!-- Page Content -->
-<div class="container">
-
-    <div class="row">
-        <div class="col-lg-12">
-
-            <div class="jumbotron" style="padding: 0; margin-bottom: 0;">
-                <div class="container">
-                    <div id="header_icon">{% block header_icon %}{% endblock %}</div>
-                    <h1>{% block headline %}{% endblock %}</h1>
-                    <p id="header_subtitle">{% block head-message %}{% endblock %}</p>
-                </div>
-            </div>
-
-        </div>
-    </div>
-
-    {% block breadcrum %}{% endblock %}
-
-    {% block content %}{% endblock %}
-
-    <hr>
-
-    <!-- Footer -->
-    <footer>
-        <div class="row">
-            <div class="col-lg-6">
-                <p>Powered by <a href="https://www.djangoproject.com/" target="_blank">Django</a></p>
-            </div>
-            <div class="col-lg-6 text-right">
-                <p class="mb-2 text-muted">&copy; <a href="https://www.marketmavens.co.zw" target="_blank">Market Mavens</a></p>
-            </div>
-        </div>
-    </footer>
-
+<div class="posb-page-header">
+  <div class="page-header-icon">{% block header_icon %}{% endblock %}</div>
+  <div class="page-header-text">
+    <h1>{% block headline %}{% endblock %}</h1>
+    <p>{% block head-message %}{% endblock %}</p>
+  </div>
 </div>
 
-<!-- Bootstrap JS -->
-<script src="{% static 'bootstrap/js/bootstrap.min.js' %}"></script>
+<div class="posb-content">
+  {% block breadcrum %}{% endblock %}
+  {% block content %}{% endblock %}
+</div>
 
+<footer class="posb-footer">
+  <span>Powered by <a href="https://www.djangoproject.com/" target="_blank">Django</a></span>
+  <span>&copy; <a href="https://www.marketmavens.co.zw" target="_blank">Market Mavens</a></span>
+</footer>
+
+<script src="{% static 'bootstrap/js/bootstrap.min.js' %}"></script>
+{% block extra_js %}{% endblock %}
 </body>
 </html>

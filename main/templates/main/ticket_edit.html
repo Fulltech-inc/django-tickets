@@ -40,3 +40,48 @@
 {% endif %}
 
 {% endblock %}
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+
+    var $mainSelect = $('#id_category');
+    var $subWrapper = $('#div_id_sub_category');
+    var $subSelect  = $('#id_sub_category');
+
+    console.log('main select:', $mainSelect.length);      // must be 1
+    console.log('sub wrapper:', $subWrapper.length);      // must be 1
+    console.log('sub select:',  $subSelect.length);       // must be 1
+
+    // Force hide on load
+    $subWrapper.hide();
+
+    $mainSelect.on('change', function() {
+        var mainId = $(this).val();
+        console.log('Selected main id:', mainId);
+
+        // Reset sub
+        $subSelect.empty().append('<option value="">— Select sub category —</option>');
+        $subWrapper.hide();
+
+        if (!mainId) return;
+
+        $.getJSON('/ajax/subcategories/', { main_id: mainId })
+            .done(function(data) {
+                console.log('Subcategories returned:', data);
+                if (data.length === 0) return;
+
+                $.each(data, function(i, sub) {
+                    $subSelect.append(
+                        $('<option>').val(sub.id).text(sub.name)
+                    );
+                });
+                $subWrapper.show();
+            })
+            .fail(function(jqXHR, textStatus, errorThrown) {
+                console.error('AJAX failed:', textStatus, errorThrown);
+                console.error('Response:', jqXHR.responseText);
+            });
+    });
+});
+</script>
+{% endblock %}
