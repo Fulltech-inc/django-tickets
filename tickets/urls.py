@@ -52,7 +52,6 @@ urlpatterns = [
     path('reports/delete/', login_required(main.views.delete_reports_view), name='delete_reports'),
 
 
-
 ]
 
 if settings.DEBUG:

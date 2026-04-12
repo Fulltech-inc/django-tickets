@@ -257,7 +257,7 @@
             <div class="cat-row">
               <div class="cat-name" title="{{ cat.category__name|default:'Uncategorized' }}">{{ cat.category__name|default:"Uncategorized" }}</div>
               <div class="cat-bar-track">
-                <div class="cat-bar-fill" style="width:{% if total_tickets %}{% widthratio cat.count total_tickets 100 %}{% else %}0{% endif %}%"></div>
+                <div class="cat-bar-fill" style="width:{% if total_tickets %}{% widthratio cat.count total_tickets 100 %}{% else %}0{% endif %} %"></div>
               </div>
               <div class="cat-count">{{ cat.count }}</div>
             </div>
@@ -385,6 +385,7 @@
       </div>
     </div>
   </div>
+  
 
   <!-- TAB: ESCALATED TICKETS -->
   <div id="tab-sla" class="tab-pane">
