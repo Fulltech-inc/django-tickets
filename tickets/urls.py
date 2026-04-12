@@ -50,8 +50,6 @@ urlpatterns = [
     path('reports/generated/', login_required(main.views.generated_reports_view), name='generated_reports'),
     path('reports/download/<int:pk>/', login_required(main.views.download_report_view), name='download_report'),
     path('reports/delete/', login_required(main.views.delete_reports_view), name='delete_reports'),
-
-
 ]
 
 if settings.DEBUG:
