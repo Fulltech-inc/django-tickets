@@ -172,7 +172,6 @@
         </div>
         <div style="display:flex;gap:6px;align-items:flex-end;flex-wrap:wrap;">
           <a href="{% url 'reports' %}" class="btn-reset">Reset</a>
-          <!--a href="{% url 'reports_export_pdf' %}?{{ request.GET.urlencode }}" class="btn-export pdf">&#128209; Export PDF</a-->
           <button type="button" id="queue-btn" class="btn-export queue" onclick="queueReport()">
             &#128196; Generate Excel
           </button>
