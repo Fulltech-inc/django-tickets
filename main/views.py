@@ -1,41 +1,42 @@
 # -*- coding: utf-8 -*-
 
-from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.models import User
-from django.http import HttpResponseRedirect
-from django.utils import timezone
-from .models import Ticket, Attachment, FollowUp, TicketActivity, TicketEscalation, Category
-from .forms import UserSettingsForm, TicketCreateForm, TicketEditForm, FollowupForm, AttachmentForm
-from django.core.mail import send_mail
-from django.conf import settings
-import logging
-from .activity_utils import log_activity
-from datetime import timedelta
-from django.db.models import Count, Q
-from django.http import HttpResponseForbidden
-from io import BytesIO
-from django.http import HttpResponse
-from reportlab.lib import colors
-from reportlab.lib.pagesizes import A4, landscape
-from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, HRFlowable
-from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.lib.units import inch, cm
-from django.http import JsonResponse
-from urllib.parse import unquote
-from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib.auth.decorators import login_required
-from django.utils import timezone
-from .models import TicketEscalation, Ticket
+# Standard library
 import csv
+import logging
+from datetime import timedelta
 from io import BytesIO
-from django.http import HttpResponse
+from urllib.parse import unquote
+
+# Django
+from django.conf import settings
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
+from django.core.mail import send_mail
+from django.db.models import Count, Q
+from django.http import HttpResponse, HttpResponseForbidden, HttpResponseRedirect, JsonResponse
+from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
+
+# Third-party
+from django_q.tasks import async_task
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import A4, landscape
-from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.lib.units import inch
-from django_q.tasks import async_task
-from .models import GeneratedReport
+from reportlab.lib.units import cm, inch
+from reportlab.platypus import HRFlowable, Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
+
+# Local
+from .activity_utils import log_activity
+from .forms import AttachmentForm, FollowupForm, TicketCreateForm, TicketEditForm, UserSettingsForm
+from .models import (
+    Attachment,
+    Category,
+    FollowUp,
+    GeneratedReport,
+    Ticket,
+    TicketActivity,
+    TicketEscalation,
+)
 
 
 logger = logging.getLogger(__name__)

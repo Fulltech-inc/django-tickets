@@ -45,7 +45,6 @@ urlpatterns = [
     # REPORTS
     path('reports/', login_required(main.views.reports_view), name='reports'),
     path('reports/export/csv', login_required(main.views.export_reports_excel), name='reports_export'),
-    path('reports/export/pdf/', login_required(main.views.export_reports_pdf), name='reports_export_pdf'),
     path('ajax/subcategories/', main.views.get_subcategories, name='get_subcategories'),
     path('reports/queue/', login_required(main.views.queue_report_view), name='queue_report'),
     path('reports/generated/', login_required(main.views.generated_reports_view), name='generated_reports'),
