@@ -70,19 +70,7 @@ def _escalate(ticket, level, from_user, to_user, base_url=""):
         recipient_email=to_user.email,
     )
 
-    # 5. Notify the PREVIOUS Owner (The person it was taken from)
-    if from_user and from_user.email:
-        _send_escalation_email(
-            subject=f"[Escalation L{level}] Ticket #{ticket.id} moved from your queue",
-            message=(
-                f"Hi {from_user.first_name or from_user.username},\n\n"
-                f"Ticket #{ticket.id} has been escalated to "
-                f"{to_user.get_full_name() or to_user.username} "
-                f"because the resolution time threshold was exceeded.\n\n"
-                f"View ticket: {ticket_url}"
-            ),
-            recipient_email=from_user.email,
-        )
+    
 
     # 6. Mark as complete
     escalation.notification_sent = True
@@ -107,7 +95,7 @@ def _escalate(ticket, level, from_user, to_user, base_url=""):
     # Email to previous owner
     if from_user and from_user.email:
         _send_escalation_email(
-            subject=f"[Escalation L{level}] Ticket #{ticket.id} escalated from your queue",
+            subject=f"[Escalation L{level}] Ticket #{ticket.id} escalated from your department",
             message=(
                 f"Hi {from_user.first_name or from_user.username},\n\n"
                 f"Ticket #{ticket.id} — \"{ticket.title}\" has been escalated "
