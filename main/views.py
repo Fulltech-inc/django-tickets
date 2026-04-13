@@ -66,32 +66,18 @@ def get_subcategories(request):
 
 def all_tickets_view(request):
     user = request.user
-    if user.is_superuser or user.is_staff:
-        tickets_open = Ticket.objects.exclude(status="DONE").select_related(
-            'category', 'sub_category', 'owner', 'assigned_to'
-        )
-    else:
-        tickets_open = Ticket.objects.filter(
-            assigned_to=user
-        ).exclude(status="DONE").select_related(
-            'category', 'sub_category', 'owner', 'assigned_to'
-        )
+    tickets_open = Ticket.objects.exclude(status="DONE").select_related(
+        'category', 'sub_category', 'owner', 'assigned_to'
+    )
     context = {"tickets": tickets_open}
     return render(request, 'main/all-tickets.html', context)
 
 
 def archive_view(request):
     user = request.user
-    if user.is_superuser or user.is_staff:
-        tickets_closed = Ticket.objects.filter(status="DONE").select_related(
-            'category', 'sub_category', 'owner', 'assigned_to'
-        )
-    else:
-        tickets_closed = Ticket.objects.filter(
-            assigned_to=user, status="DONE"
-        ).select_related(
-            'category', 'sub_category', 'owner', 'assigned_to'
-        )
+    tickets_closed = Ticket.objects.filter(status="DONE").select_related(
+        'category', 'sub_category', 'owner', 'assigned_to'
+    )
     context = {"tickets": tickets_closed}
     return render(request, 'main/archive.html', context)
 
