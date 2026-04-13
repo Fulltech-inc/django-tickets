@@ -1,5 +1,7 @@
 from django.apps import AppConfig
 import sys
+import os
+import atexit
 
 
 class MainConfig(AppConfig):
@@ -8,6 +10,10 @@ class MainConfig(AppConfig):
 
     def ready(self):
         if 'migrate' in sys.argv or 'makemigrations' in sys.argv:
+            return
+
+        # Prevent double-start from Django's auto-reloader
+        if os.environ.get('RUN_MAIN') != 'true':
             return
 
         try:
@@ -32,6 +38,7 @@ class MainConfig(AppConfig):
             )
 
             scheduler.start()
+            atexit.register(lambda: scheduler.shutdown(wait=False))  # Clean shutdown
             print("Escalation scheduler started.")
 
         except Exception as e:

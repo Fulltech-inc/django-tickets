@@ -164,19 +164,6 @@ def ticket_create_view(request):
                 logger.error(f"Email failed: {e}")
                 print(f"Email error: {e}")
 
-            # Email notification
-            try:
-                base_url = f"http://{request.get_host()}/ticket/{obj.id}/"
-                send_mail(
-                    subject=f"[#{obj.id}] New Ticket: {obj.title}",
-                    message=f"Interaction ID: {obj.interaction_id}\n\nView: {base_url}",
-                    from_email=settings.EMAIL_HOST_USER,
-                    recipient_list=[obj.assigned_to.email],
-                    fail_silently=False,
-                )
-            except Exception as e:
-                logger.error(f"Email failed: {e}")
-
             return redirect('inbox')
     else:
         # Get interaction_id from XCALLY URL parameters
