@@ -45,18 +45,8 @@ logger = logging.getLogger(__name__)
 def inbox_view(request):
     user = request.user
 
-    if user.is_superuser or user.is_staff:
-        # Superusers see ALL open tickets
-        tickets = Ticket.objects.exclude(status="DONE").select_related(
-            'category', 'sub_category', 'owner', 'assigned_to'
-        )
-        tickets_waiting = Ticket.objects.filter(status="WAITING").select_related(
-            'category', 'sub_category', 'owner', 'assigned_to'
-        )
-    else:
-        # Regular users only see tickets assigned to them
-        tickets = Ticket.objects.filter(assigned_to=user).exclude(status="DONE")
-        tickets_waiting = Ticket.objects.filter(waiting_for=user, status="WAITING")
+    tickets = Ticket.objects.filter(assigned_to=user).exclude(status="DONE")
+    tickets_waiting = Ticket.objects.filter(waiting_for=user, status="WAITING")
 
     from django.db.models import Prefetch
     tickets = tickets.prefetch_related(Prefetch('attachment_set', to_attr='prefetched_attachments'))
