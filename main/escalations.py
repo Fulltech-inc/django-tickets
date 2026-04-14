@@ -24,19 +24,16 @@ def _send_escalation_email(subject, message, recipient_email):
     except Exception as e:
         logger.error(f"Email failed to {recipient_email}: {e}")
 
-
 def _escalate(ticket, level, from_user, to_user, base_url=""):
     if not to_user:
         logger.warning(f"Ticket #{ticket.id}: no target user for L{level}, skipping.")
         return
 
-    # 1. Update Ticket State
     ticket.assigned_to = to_user
     ticket.escalation_count = level
     ticket.last_escalation_at = timezone.now()
     ticket.save(update_fields=['assigned_to', 'escalation_count', 'last_escalation_at'])
 
-    # 2. Create Audit Record
     escalation = TicketEscalation.objects.create(
         ticket=ticket,
         escalation_level=level,
@@ -46,10 +43,9 @@ def _escalate(ticket, level, from_user, to_user, base_url=""):
         notification_sent=False,
     )
 
-    # 3. Log activity
     log_activity(
-        ticket, 
-        'ESCALATED', 
+        ticket,
+        'ESCALATED',
         performed_by=from_user if from_user else to_user,
         from_dept=from_user,
         to_dept=to_user,
@@ -58,44 +54,14 @@ def _escalate(ticket, level, from_user, to_user, base_url=""):
 
     ticket_url = f"{base_url}/ticket/{ticket.id}/"
 
-    # 4. Notify the NEW Owner (The Escalation Target)
+    
+    # Email to new owner — once only
     _send_escalation_email(
-        subject=f"[Escalation L{level}] Ticket #{ticket.id} assigned to you",
-        message=(
-            f"Hi {to_user.first_name or to_user.username},\n\n"
-            f"Ticket #{ticket.id} - \"{ticket.title}\" has been escalated to you "
-            f"(Level {level}) because it requires urgent attention.\n\n"
-            f"View ticket: {ticket_url}"
-        ),
-        recipient_email=to_user.email,
-    )
-
-    # 5. Notify the PREVIOUS Owner (The person it was taken from)
-    if from_user and from_user.email:
-        _send_escalation_email(
-            subject=f"[Escalation L{level}] Ticket #{ticket.id} moved from your queue",
-            message=(
-                f"Hi {from_user.first_name or from_user.username},\n\n"
-                f"Ticket #{ticket.id} has been escalated to "
-                f"{to_user.get_full_name() or to_user.username} "
-                f"because the resolution time threshold was exceeded.\n\n"
-                f"View ticket: {ticket_url}"
-            ),
-            recipient_email=from_user.email,
-        )
-
-    # 6. Mark as complete
-    escalation.notification_sent = True
-    escalation.save(update_fields=['notification_sent'])
-    logger.info(f"Ticket #{ticket.id} escalated to L{level} -> {to_user}")
-
-    # Email to new owner
-    _send_escalation_email(
-        subject=f"[Escalation L{level}] Ticket #{ticket.id} assigned to you",
+        subject=f"Ticket[#{ticket.id}] escalated to you",
         message=(
             f"Hi {to_user.first_name or to_user.username},\n\n"
             f"Ticket #{ticket.id} — \"{ticket.title}\" has been escalated to you "
-            f"(Level {level}) because it has not been resolved.\n\n"
+            f"because it has not been resolved.\n\n"
             f"Current status: {ticket.status}\n"
             f"Created: {ticket.created.strftime('%d %b %Y %H:%M')}\n"
             f"View ticket: {ticket_url}\n\n"
@@ -104,14 +70,17 @@ def _escalate(ticket, level, from_user, to_user, base_url=""):
         recipient_email=to_user.email,
     )
 
+    title = "manager" if level == 1 else "director"
     # Email to previous owner
     if from_user and from_user.email:
+        
         _send_escalation_email(
-            subject=f"[Escalation L{level}] Ticket #{ticket.id} escalated from your queue",
+            
+            subject=f"Ticket[#{ticket.id}] escalated to the {title}",
             message=(
                 f"Hi {from_user.first_name or from_user.username},\n\n"
                 f"Ticket #{ticket.id} — \"{ticket.title}\" has been escalated "
-                f"(Level {level}) to {to_user.get_full_name() or to_user.username} "
+                f"to the {title} {to_user.get_full_name() or to_user.username} "
                 f"because it was not resolved in time.\n\n"
                 f"Current status: {ticket.status}\n"
                 f"View ticket: {ticket_url}"

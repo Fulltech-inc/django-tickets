@@ -502,14 +502,14 @@ function queueReport() {
   })
   .then(function(r){ return r.json(); })
   .then(function(data){
-    btn.textContent = '✅ Queued!';
-    showToast('✅ Report queued successfully! Go to My Reports to download when ready.', 'success');
+    btn.textContent = '✅ Done!';
+    showToast('✅ Report ready! Click My Reports to download.', 'success');
     setTimeout(function(){
-      btn.textContent = '📄 Generate Excel';
-      btn.style.opacity = '1';
-      btn.disabled = false;
+        btn.textContent = '📄 Generate Excel';
+        btn.style.opacity = '1';
+        btn.disabled = false;
     }, 3000);
-  })
+})
   .catch(function(){
     btn.textContent = '📄 Generate Excel';
     btn.style.opacity = '1';

@@ -163,22 +163,6 @@ class EscalationConfig(models.Model):
         return cls.objects.filter(is_active=True).first()
 
 
-class EscalationRule(models.Model):
-    name = models.CharField('Name', max_length=255)
-    escalation_level = models.IntegerField('Escalation Level', default=1)
-    threshold_hours = models.IntegerField('Threshold (hours)', default=48)
-    target_role = models.CharField('Target Role', max_length=255, blank=True, null=True)
-    is_active = models.BooleanField('Active', default=True)
-
-    class Meta:
-        verbose_name = 'Escalation Rule'
-        verbose_name_plural = 'Escalation Rules'
-        ordering = ['escalation_level']
-
-    def __str__(self):
-        return f"{self.name} (L{self.escalation_level}, {self.threshold_hours}h)"
-
-
 class TicketEscalation(models.Model):
     STATUS_CHOICES = (
         ('PENDING', 'Pending'),

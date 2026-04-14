@@ -79,7 +79,7 @@ def generate_report_task(report_id):
         writer.writerow([
             'Ticket ID', 'Interaction ID', 'Title', 'Description', 'Status',
             'Main Category', 'Sub Category', 'Owner', 'Assigned To', 'Waiting For',
-            'Created At', 'Last Updated', 'Closed At', 'Resolution Time (hrs)',
+            'Created At', 'Last Updated', 'Closed At', 'Resolution Time (mins)',
             'Escalated?', 'Escalation Level', 'Escalation Status',
             'Escalated To', 'Escalated From', 'Escalated At', 'Escalation Acknowledged At',
             'Follow-up Count', 'Attachment Count',
@@ -88,7 +88,7 @@ def generate_report_task(report_id):
         for ticket in tickets:
             res_hrs = ''
             if ticket.closed_date:
-                res_hrs = round((ticket.closed_date - ticket.created).total_seconds() / 3600, 2)
+                res_hrs = round((ticket.closed_date - ticket.created).total_seconds() / 60, 2)
 
             escalations = list(ticket.escalations.all())
             if escalations:

@@ -41,19 +41,9 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'crispy_forms',
     'django_apscheduler', 
-    'django_q',
-
+    'django_cleanup.apps.CleanupConfig'
 )
 
-Q_CLUSTER = {
-    'name': 'tickets',
-    'workers': 2,
-    'timeout': 300,
-    'retry': 360,
-    'queue_limit': 50,
-    'bulk': 10,
-    'orm': 'default',  # uses your existing DB, no Redis needed
-}
 
 TEMPLATES = [
     {

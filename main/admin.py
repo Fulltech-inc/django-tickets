@@ -3,7 +3,7 @@
 from django.contrib import admin
 from django.contrib.auth.models import User
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-from .models import Ticket, FollowUp, Attachment, EscalationRule, TicketEscalation, UserProfile, EscalationConfig, Category
+from .models import Ticket, FollowUp, Attachment, TicketEscalation, UserProfile, EscalationConfig, Category
 
 
 
@@ -41,10 +41,6 @@ class EscalationConfigAdmin(admin.ModelAdmin):
     )
 
 
-@admin.register(EscalationRule)
-class EscalationRuleAdmin(admin.ModelAdmin):
-    list_display = ('name', 'escalation_level', 'threshold_hours', 'target_role', 'is_active')
-    list_filter = ('is_active', 'escalation_level')
 
 
 @admin.register(TicketEscalation)

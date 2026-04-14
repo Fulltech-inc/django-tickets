@@ -18,7 +18,6 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 
 # Third-party
-from django_q.tasks import async_task
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import A4, landscape
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
@@ -45,18 +44,8 @@ logger = logging.getLogger(__name__)
 def inbox_view(request):
     user = request.user
 
-    if user.is_superuser or user.is_staff:
-        # Superusers see ALL open tickets
-        tickets = Ticket.objects.exclude(status="DONE").select_related(
-            'category', 'sub_category', 'owner', 'assigned_to'
-        )
-        tickets_waiting = Ticket.objects.filter(status="WAITING").select_related(
-            'category', 'sub_category', 'owner', 'assigned_to'
-        )
-    else:
-        # Regular users only see tickets assigned to them
-        tickets = Ticket.objects.filter(assigned_to=user).exclude(status="DONE")
-        tickets_waiting = Ticket.objects.filter(waiting_for=user, status="WAITING")
+    tickets = Ticket.objects.filter(assigned_to=user).exclude(status="DONE")
+    tickets_waiting = Ticket.objects.filter(waiting_for=user, status="WAITING")
 
     from django.db.models import Prefetch
     tickets = tickets.prefetch_related(Prefetch('attachment_set', to_attr='prefetched_attachments'))
@@ -76,32 +65,18 @@ def get_subcategories(request):
 
 def all_tickets_view(request):
     user = request.user
-    if user.is_superuser or user.is_staff:
-        tickets_open = Ticket.objects.exclude(status="DONE").select_related(
-            'category', 'sub_category', 'owner', 'assigned_to'
-        )
-    else:
-        tickets_open = Ticket.objects.filter(
-            assigned_to=user
-        ).exclude(status="DONE").select_related(
-            'category', 'sub_category', 'owner', 'assigned_to'
-        )
+    tickets_open = Ticket.objects.exclude(status="DONE").select_related(
+        'category', 'sub_category', 'owner', 'assigned_to'
+    )
     context = {"tickets": tickets_open}
     return render(request, 'main/all-tickets.html', context)
 
 
 def archive_view(request):
     user = request.user
-    if user.is_superuser or user.is_staff:
-        tickets_closed = Ticket.objects.filter(status="DONE").select_related(
-            'category', 'sub_category', 'owner', 'assigned_to'
-        )
-    else:
-        tickets_closed = Ticket.objects.filter(
-            assigned_to=user, status="DONE"
-        ).select_related(
-            'category', 'sub_category', 'owner', 'assigned_to'
-        )
+    tickets_closed = Ticket.objects.filter(status="DONE").select_related(
+        'category', 'sub_category', 'owner', 'assigned_to'
+    )
     context = {"tickets": tickets_closed}
     return render(request, 'main/archive.html', context)
 
@@ -142,45 +117,33 @@ def ticket_create_view(request):
                     user=request.user
                 )
 
-            # Email notification debugging
-            try:
-                base_url = f"http://{request.get_host()}/ticket/{obj.id}/"                
-                # Debug: print to console
-                print(f"Attempting to send email to: {obj.assigned_to}")
-                print(f"Recipient email: {obj.assigned_to.email if obj.assigned_to else 'No assigned_to'}")
-                
-                if obj.assigned_to and obj.assigned_to.email:
+            # Send email notification — single clean attempt
+            if obj.assigned_to and obj.assigned_to.email:
+                try:
+                    base_url = f"http://{request.get_host()}/ticket/{obj.id}/"
                     send_mail(
-                        subject=f"[#{obj.id}] New Ticket: {obj.title}",
-                        message=f"Interaction ID: {obj.interaction_id}\n\nView: {base_url}",
+                        subject=f"Assigned New Ticket[#{obj.id}]: {obj.title}",
+                        message=(
+                            f"Hi {obj.assigned_to.first_name or obj.assigned_to.username},\n\n"
+                            f"A new ticket has been assigned to you.\n\n"
+                            f"Title: {obj.title}\n"
+                            f"Interaction ID: {obj.interaction_id or 'N/A'}\n"
+                            f"Status: {obj.status}\n\n"
+                            f"View ticket: {base_url}"
+                        ),
                         from_email=settings.EMAIL_HOST_USER,
                         recipient_list=[obj.assigned_to.email],
                         fail_silently=False,
                     )
-                    print("Email sent successfully")
-                else:
-                    print("Skipping email - no assigned_to or no email")
-            except Exception as e:
-                logger.error(f"Email failed: {e}")
-                print(f"Email error: {e}")
-
-            # Email notification
-            try:
-                base_url = f"http://{request.get_host()}/ticket/{obj.id}/"
-                send_mail(
-                    subject=f"[#{obj.id}] New Ticket: {obj.title}",
-                    message=f"Interaction ID: {obj.interaction_id}\n\nView: {base_url}",
-                    from_email=settings.EMAIL_HOST_USER,
-                    recipient_list=[obj.assigned_to.email],
-                    fail_silently=False,
-                )
-            except Exception as e:
-                logger.error(f"Email failed: {e}")
+                    logger.info(f"Email sent to {obj.assigned_to.email} for ticket #{obj.id}")
+                except Exception as e:
+                    logger.error(f"Email failed for ticket #{obj.id}: {e}")
+            else:
+                logger.info(f"Ticket #{obj.id} created with no assigned user or no email — skipping notification")
 
             return redirect('inbox')
     else:
-        # Get interaction_id from XCALLY URL parameters
-        ixid = request.GET.get('interaction_id', '') 
+        ixid = request.GET.get('interaction_id', '')
         call_id = request.GET.get('call_id', '')
         caller_name = unquote(request.GET.get('caller_name', ''))
 
@@ -234,7 +197,7 @@ def ticket_edit_view(request, pk):
             base_url = f"http://{request.get_host()}/ticket/{data.id}/"
             if assigned_to_changed:
 
-                notification_subject = f"[#{data.id}] Assigned a ticket"
+                notification_subject = f"Assigned Ticket[#{data.id}]"
                 notification_body = f"Hi,\n\nA ticket was assigned to you: {base_url}"
 
                 # email connection
@@ -594,7 +557,7 @@ def export_reports_excel(request):
         'Created At',
         'Last Updated',
         'Closed At',
-        'Resolution Time (hrs)',
+        'Resolution Time (mins)',
         'Escalated?',
         'Escalation Level',
         # 'Escalation Status',
@@ -609,7 +572,7 @@ def export_reports_excel(request):
     for ticket in tickets:
         res_hrs = ''
         if ticket.closed_date:
-            res_hrs = round((ticket.closed_date - ticket.created).total_seconds() / 3600, 2)
+            res_hrs = round((ticket.closed_date - ticket.created).total_seconds() / 60, 2)
 
         escalations = list(ticket.escalations.all())
         if escalations:
@@ -674,7 +637,7 @@ def delete_reports_view(request):
 def queue_report_view(request):
     if not request.user.is_superuser and not request.user.is_staff:
         return HttpResponseForbidden()
-    
+
     filters = {
         'start_date': request.GET.get('start_date', ''),
         'end_date': request.GET.get('end_date', ''),
@@ -683,15 +646,24 @@ def queue_report_view(request):
         'category': request.GET.get('category', ''),
         'date_filter': request.GET.get('date_filter', 'all'),
     }
+
     report = GeneratedReport.objects.create(
-        requested_by=request.user, filters=filters, status='QUEUED',
+        requested_by=request.user,
+        filters=filters,
+        status='QUEUED',
     )
-    async_task('main.tasks.generate_report_task', report.id)
-    from django.http import JsonResponse
+
+    # Run synchronously — no background worker needed
+    try:
+        from .tasks import generate_report_task
+        generate_report_task(report.id)
+    except Exception as e:
+        logger.error(f"Report generation failed: {e}")
+
     return JsonResponse({
         'status': 'queued',
         'report_id': report.id,
-        'message': 'Report queued successfully! Check Generated Reports to download when ready.'
+        'message': 'Report generated successfully! Go to My Reports to download.',
     })
 
 
