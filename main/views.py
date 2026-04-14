@@ -123,7 +123,7 @@ def ticket_create_view(request):
                 try:
                     base_url = f"http://{request.get_host()}/ticket/{obj.id}/"
                     send_mail(
-                        subject=f"[#{obj.id}] New Ticket Assigned: {obj.title}",
+                        subject=f"Assigned New Ticket[#{obj.id}]: {obj.title}",
                         message=(
                             f"Hi {obj.assigned_to.first_name or obj.assigned_to.username},\n\n"
                             f"A new ticket has been assigned to you.\n\n"
@@ -198,7 +198,7 @@ def ticket_edit_view(request, pk):
             base_url = f"http://{request.get_host()}/ticket/{data.id}/"
             if assigned_to_changed:
 
-                notification_subject = f"[#{data.id}] Assigned a ticket"
+                notification_subject = f"Assigned Ticket[#{data.id}]"
                 notification_body = f"Hi,\n\nA ticket was assigned to you: {base_url}"
 
                 # email connection

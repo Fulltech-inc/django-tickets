@@ -54,13 +54,14 @@ def _escalate(ticket, level, from_user, to_user, base_url=""):
 
     ticket_url = f"{base_url}/ticket/{ticket.id}/"
 
+    
     # Email to new owner — once only
     _send_escalation_email(
-        subject=f"[Escalation L{level}] Ticket #{ticket.id} escalated to you",
+        subject=f"Ticket[#{ticket.id}] escalated to you",
         message=(
             f"Hi {to_user.first_name or to_user.username},\n\n"
             f"Ticket #{ticket.id} — \"{ticket.title}\" has been escalated to you "
-            f"(Level {level}) because it has not been resolved.\n\n"
+            f"because it has not been resolved.\n\n"
             f"Current status: {ticket.status}\n"
             f"Created: {ticket.created.strftime('%d %b %Y %H:%M')}\n"
             f"View ticket: {ticket_url}\n\n"
@@ -69,14 +70,17 @@ def _escalate(ticket, level, from_user, to_user, base_url=""):
         recipient_email=to_user.email,
     )
 
+    title = "manager" if level == 1 else title = "director"
     # Email to previous owner
     if from_user and from_user.email:
+        
         _send_escalation_email(
-            subject=f"[Escalation L{level}] Ticket #{ticket.id} escalated from your department",
+            
+            subject=f"Ticket[#{ticket.id}] escalated to the {title}",
             message=(
                 f"Hi {from_user.first_name or from_user.username},\n\n"
                 f"Ticket #{ticket.id} — \"{ticket.title}\" has been escalated "
-                f"(Level {level}) to {to_user.get_full_name() or to_user.username} "
+                f"to the {title} {to_user.get_full_name() or to_user.username} "
                 f"because it was not resolved in time.\n\n"
                 f"Current status: {ticket.status}\n"
                 f"View ticket: {ticket_url}"
