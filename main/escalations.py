@@ -70,7 +70,7 @@ def _escalate(ticket, level, from_user, to_user, base_url=""):
         recipient_email=to_user.email,
     )
 
-    title = "manager" if level == 1 else title = "director"
+    title = "manager" if level == 1 else "director"
     # Email to previous owner
     if from_user and from_user.email:
         
