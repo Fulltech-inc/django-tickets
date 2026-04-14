@@ -118,32 +118,33 @@ def ticket_create_view(request):
                     user=request.user
                 )
 
-            # Email notification debugging
-            try:
-                base_url = f"http://{request.get_host()}/ticket/{obj.id}/"                
-                # Debug: print to console
-                print(f"Attempting to send email to: {obj.assigned_to}")
-                print(f"Recipient email: {obj.assigned_to.email if obj.assigned_to else 'No assigned_to'}")
-                
-                if obj.assigned_to and obj.assigned_to.email:
+            # Send email notification — single clean attempt
+            if obj.assigned_to and obj.assigned_to.email:
+                try:
+                    base_url = f"http://{request.get_host()}/ticket/{obj.id}/"
                     send_mail(
-                        subject=f"[#{obj.id}] New Ticket: {obj.title}",
-                        message=f"Interaction ID: {obj.interaction_id}\n\nView: {base_url}",
+                        subject=f"[#{obj.id}] New Ticket Assigned: {obj.title}",
+                        message=(
+                            f"Hi {obj.assigned_to.first_name or obj.assigned_to.username},\n\n"
+                            f"A new ticket has been assigned to you.\n\n"
+                            f"Title: {obj.title}\n"
+                            f"Interaction ID: {obj.interaction_id or 'N/A'}\n"
+                            f"Status: {obj.status}\n\n"
+                            f"View ticket: {base_url}"
+                        ),
                         from_email=settings.EMAIL_HOST_USER,
                         recipient_list=[obj.assigned_to.email],
                         fail_silently=False,
                     )
-                    print("Email sent successfully")
-                else:
-                    print("Skipping email - no assigned_to or no email")
-            except Exception as e:
-                logger.error(f"Email failed: {e}")
-                print(f"Email error: {e}")
+                    logger.info(f"Email sent to {obj.assigned_to.email} for ticket #{obj.id}")
+                except Exception as e:
+                    logger.error(f"Email failed for ticket #{obj.id}: {e}")
+            else:
+                logger.info(f"Ticket #{obj.id} created with no assigned user or no email — skipping notification")
 
             return redirect('inbox')
     else:
-        # Get interaction_id from XCALLY URL parameters
-        ixid = request.GET.get('interaction_id', '') 
+        ixid = request.GET.get('interaction_id', '')
         call_id = request.GET.get('call_id', '')
         caller_name = unquote(request.GET.get('caller_name', ''))
 
