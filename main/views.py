@@ -18,7 +18,6 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 
 # Third-party
-#from django_q.tasks import async_task
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import A4, landscape
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
