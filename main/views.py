@@ -572,7 +572,7 @@ def export_reports_excel(request):
     for ticket in tickets:
         res_hrs = ''
         if ticket.closed_date:
-            res_hrs = round((ticket.closed_date - ticket.created).total_seconds() / 3600, 2)
+            res_hrs = round((ticket.closed_date - ticket.created).total_seconds() / 60, 2)
 
         escalations = list(ticket.escalations.all())
         if escalations:
