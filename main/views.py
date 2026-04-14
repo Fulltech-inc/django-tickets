@@ -557,7 +557,7 @@ def export_reports_excel(request):
         'Created At',
         'Last Updated',
         'Closed At',
-        'Resolution Time (hrs)',
+        'Resolution Time (mins)',
         'Escalated?',
         'Escalation Level',
         # 'Escalation Status',
