@@ -18,7 +18,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 
 # Third-party
-from django_q.tasks import async_task
+#from django_q.tasks import async_task
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import A4, landscape
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
@@ -638,7 +638,7 @@ def delete_reports_view(request):
 def queue_report_view(request):
     if not request.user.is_superuser and not request.user.is_staff:
         return HttpResponseForbidden()
-    
+
     filters = {
         'start_date': request.GET.get('start_date', ''),
         'end_date': request.GET.get('end_date', ''),
@@ -647,15 +647,24 @@ def queue_report_view(request):
         'category': request.GET.get('category', ''),
         'date_filter': request.GET.get('date_filter', 'all'),
     }
+
     report = GeneratedReport.objects.create(
-        requested_by=request.user, filters=filters, status='QUEUED',
+        requested_by=request.user,
+        filters=filters,
+        status='QUEUED',
     )
-    async_task('main.tasks.generate_report_task', report.id)
-    from django.http import JsonResponse
+
+    # Run synchronously — no background worker needed
+    try:
+        from .tasks import generate_report_task
+        generate_report_task(report.id)
+    except Exception as e:
+        logger.error(f"Report generation failed: {e}")
+
     return JsonResponse({
         'status': 'queued',
         'report_id': report.id,
-        'message': 'Report queued successfully! Check Generated Reports to download when ready.'
+        'message': 'Report generated successfully! Go to My Reports to download.',
     })
 
 
