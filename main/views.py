@@ -170,10 +170,6 @@ def ticket_create_view(request):
             interaction_id = request.GET.get('interaction_id', '')
             customer_mobile_phone = request.GET.get('phone', '')
 
-            # Optional: Decode URL-encoded values
-            # caller_id = unquote(caller_id)
-            # caller_name = unquote(caller_name)
-
             # Prepopulate form fields
             initial_data = {
                 'title': f"interaction from {customer_mobile_phone}" if customer_mobile_phone else '',
