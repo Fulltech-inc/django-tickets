@@ -45,12 +45,18 @@
 
           <!-- Right side - Login -->
           <ul class="nav navbar-nav navbar-right" style="display: flex; align-items: center; margin: 5px 0;">
+            {% if request.user.is_authenticated %}
+              <li><a href="{% url 'inbox' %}" title="Inbox"><i class="fa fa-home"></i></a></li>
+              <li><a href="{% url 'all-tickets' %}" title="All Tickets"><i class="fa fa-list"></i></a></li>
+              <li><a href="{% url 'archive' %}" title="Archive"><i class="fa fa-archive"></i></a></li>
+            {% else %}
             <li>
               <a href="#" title="Login" data-toggle="modal" data-target="#LoginModal" 
                 style="color: white; font-size: 17px; padding: 10px 15px;">
                 <b>Login</b>
               </a>
             </li>
+            {% endif %}
           </ul>
         </div>
       </div>
