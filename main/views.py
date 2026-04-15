@@ -174,8 +174,24 @@ def ticket_create_view(request):
 
             # Prepopulate form fields
             initial_data = {
-                'title': f"{lvl1_disposition} > {lvl2_disposition}"  if customer_mobile_phone else '',
+                'title': f"{lvl1_disposition} > {lvl2_disposition}"  if lvl1_disposition else '',
                 'description': f"Channel Type: {channel_type}\nCustomer mobile phone: {customer_mobile_phone}\nQueue ID: {queue_id}\n\n" if  customer_mobile_phone or queue_id else '',
+                'interaction_id': f"{interaction_id}"
+            }
+
+        elif channel_type == "webchat":
+        
+            # Extract caller info from GET parameters
+            queue_id = request.GET.get('queue_id', '')
+            interaction_id = request.GET.get('interaction_id', '')
+            customer_contact_id = request.GET.get('contact_id', '')
+            lvl1_disposition = request.GET.get('lvl1_disposition', '')
+            lvl2_disposition = request.GET.get('lvl2_disposition', '')
+
+            # Prepopulate form fields
+            initial_data = {
+                'title': f"{lvl1_disposition} > {lvl2_disposition}"  if lvl1_disposition else '',
+                'description': f"Channel Type: {channel_type}\nCustomer contact ID: {customer_contact_id}\nQueue ID: {queue_id}\n\n" if  customer_contact_id or queue_id else '',
                 'interaction_id': f"{interaction_id}"
             }
 
