@@ -72,6 +72,7 @@ from .models import Category
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
-    list_display = ('name', 'parent', 'is_active')
+    list_display = ('name', 'parent', 'is_active', 'created')
     list_filter = ('parent', 'is_active')
     search_fields = ('name',)
+    ordering = ('-created',)
