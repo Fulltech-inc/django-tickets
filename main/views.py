@@ -159,7 +159,7 @@ def ticket_create_view(request):
             # Prepopulate form fields
             initial_data = {
                 'title': f"Call from {caller_name}" if caller_name else '',
-                'description': f"Channel Type: {channel_type}\nCaller ID: {caller_id}\nCaller Name: {caller_name}\nQueue: {queue}" if caller_id or caller_name or queue else '',
+                'description': f"Channel Type: {channel_type}\nCaller ID: {caller_id}\nCaller Name: {caller_name}\nQueue: {queue}\n\n" if caller_id or caller_name or queue else '',
                 'interaction_id': call_id
             }
 
@@ -177,7 +177,7 @@ def ticket_create_view(request):
             # Prepopulate form fields
             initial_data = {
                 'title': f"interaction from {customer_mobile_phone}" if customer_mobile_phone else '',
-                'description': f"Channel Type: {channel_type}\nCustomer mobile phone: {customer_mobile_phone}\nQueue ID: {queue_id}" if  customer_mobile_phone or queue_id else '',
+                'description': f"Channel Type: {channel_type}\nCustomer mobile phone: {customer_mobile_phone}\nQueue ID: {queue_id}\n\n" if  customer_mobile_phone or queue_id else '',
                 'interaction_id': f"{interaction_id}"
             }
 
