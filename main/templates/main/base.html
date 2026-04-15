@@ -61,7 +61,7 @@
       display: flex; align-items: center; gap: 14px;
     }
     .page-header-icon {
-      width: 50px; height: 50px; border-radius: 10px;
+      width: 60px; height: 60px; border-radius: 10px;
       background: #FEF0E3;
       display: flex; align-items: center; justify-content: center;
       flex-shrink: 0;
@@ -101,7 +101,7 @@
 
 <nav class="posb-nav">
   <a class="posb-nav-brand" href="{% url 'inbox' %}">
-    <span class="posb-nav-title">Hi, {{ request.user.first_name }} {{ request.user.last_name }}</span>
+    <span class="posb-nav-title"><b>Hi, {{ request.user.first_name }} {{ request.user.last_name }}</b></span>
   </a>
 
   <div class="posb-nav-links">
