@@ -143,15 +143,44 @@ def ticket_create_view(request):
 
             return redirect('inbox')
     else:
-        ixid = request.GET.get('interaction_id', '')
-        call_id = request.GET.get('call_id', '')
-        caller_name = unquote(request.GET.get('caller_name', ''))
+        channel_type=request.GET.get('channel_type', '')
 
-        initial_data = {
-            'interaction_id': ixid,
-            'title': f"Call from {caller_name}" if caller_name else '',
-            'description': f"Call ID: {call_id}\nInteraction: {ixid}" if call_id else ''
-        }
+        if channel_type == "voice":
+            # Extract caller info from GET parameters
+            call_id = request.GET.get('call_id', '')
+            caller_id = request.GET.get('caller_id', '')
+            caller_name = request.GET.get('caller_name', '')
+            queue = request.GET.get('queue', '')
+
+            # Optional: Decode URL-encoded values
+            caller_id = unquote(caller_id)
+            caller_name = unquote(caller_name)
+
+            # Prepopulate form fields
+            initial_data = {
+                'title': f"Call from {caller_name}" if caller_name else '',
+                'description': f"Caller ID: {caller_id}\nCaller Name: {caller_name}\nQueue: {queue}" if caller_id or caller_name or queue else '',
+                'interaction_id': call_id
+            }
+
+        elif channel_type == "whatsapp":
+        
+            # Extract caller info from GET parameters
+            queue = request.GET.get('queue', '')
+            interaction_id = request.GET.get('interaction_id', '')
+            customer_mobile_phone = request.GET.get('phone', '')
+
+            # Optional: Decode URL-encoded values
+            # caller_id = unquote(caller_id)
+            # caller_name = unquote(caller_name)
+
+            # Prepopulate form fields
+            initial_data = {
+                'title': f"interaction from {customer_mobile_phone}" if customer_mobile_phone else '',
+                'description': f"Caller ID: {customer_mobile_phone}\nQueue: {queue}" if  customer_mobile_phone or queue else '',
+                'interaction_id': f"{interaction_id}"
+            }
+
         form = TicketCreateForm(initial=initial_data)
 
     context = {'form': form}
