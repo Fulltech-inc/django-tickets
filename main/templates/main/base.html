@@ -7,7 +7,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="shortcut icon" href="{% static 'img/posb_mock_up.png' %}">
   <link href="{% static 'bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
-  <title>{% block title %}POSB - Ticketing App{% endblock %}</title>
+  <title>Tickets - {% block title %}{% endblock %}</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; }
 
@@ -103,7 +103,7 @@
 <nav class="posb-nav">
   <a class="posb-nav-brand" href="{% url 'inbox' %}">
     <div class="posb-logo"><span>PO</span><span>SB</span></div>
-    <span class="posb-nav-title">POSB Ticketing System</span>
+    <span class="posb-nav-title">People’s Own Savings Bank Ticketing System</span>
   </a>
 
   <div class="posb-nav-links">
