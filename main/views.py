@@ -153,20 +153,20 @@ def ticket_create_view(request):
             queue = request.GET.get('queue', '')
 
             # Optional: Decode URL-encoded values
-            caller_id = unquote(caller_id)
-            caller_name = unquote(caller_name)
+            # caller_id = unquote(caller_id)
+            # caller_name = unquote(caller_name)
 
             # Prepopulate form fields
             initial_data = {
                 'title': f"Call from {caller_name}" if caller_name else '',
-                'description': f"Caller ID: {caller_id}\nCaller Name: {caller_name}\nQueue: {queue}" if caller_id or caller_name or queue else '',
+                'description': f"Channel Type: {channel_type}\nCaller ID: {caller_id}\nCaller Name: {caller_name}\nQueue: {queue}" if caller_id or caller_name or queue else '',
                 'interaction_id': call_id
             }
 
         elif channel_type == "whatsapp":
         
             # Extract caller info from GET parameters
-            queue = request.GET.get('queue', '')
+            queue_id = request.GET.get('queue_id', '')
             interaction_id = request.GET.get('interaction_id', '')
             customer_mobile_phone = request.GET.get('phone', '')
 
@@ -177,7 +177,7 @@ def ticket_create_view(request):
             # Prepopulate form fields
             initial_data = {
                 'title': f"interaction from {customer_mobile_phone}" if customer_mobile_phone else '',
-                'description': f"Caller ID: {customer_mobile_phone}\nQueue: {queue}" if  customer_mobile_phone or queue else '',
+                'description': f"Channel Type: {channel_type}\nCustomer mobile phone: {customer_mobile_phone}\nQueue ID: {queue_id}" if  customer_mobile_phone or queue_id else '',
                 'interaction_id': f"{interaction_id}"
             }
 
