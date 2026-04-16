@@ -148,7 +148,6 @@
       </div>
     </div>
 
-    <!-- Login Modal -->
     <div class="modal fade posb-modal" id="LoginModal" tabindex="-1" role="dialog" aria-labelledby="LoginModalLabel" aria-hidden="true">
       <div class="modal-dialog posb-modal-dialog" role="document">
         <div class="modal-content">
@@ -186,7 +185,6 @@
       </div>
     </div>
 
-    <!-- Error Modal -->
     <div class="modal fade posb-modal" id="ErrorModal" tabindex="-1" role="dialog" aria-labelledby="ErrorModalLabel" aria-hidden="true">
       <div class="modal-dialog posb-modal-dialog" role="document">
         <div class="modal-content">
@@ -204,35 +202,61 @@
       </div>
     </div>
 
-    <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
-    <script src="{% static 'bootstrap/js/bootstrap.min.js' %}"></script>
+<script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
+<script src="{% static 'bootstrap/js/bootstrap.min.js' %}"></script>
 
-    {% if form.errors %}
-    <script>
-      $('#ErrorModal').modal();
+<script>
+  (function($) {
+    if ($.fn.modal && $.fn.modal.Constructor) {
+      var Modal = $.fn.modal.Constructor.prototype;
 
-      $('#LinkLogin').click(function() {
-        $('#ErrorModal').modal('hide');
-        $('#LoginModal').modal('show');
-        return false;
-      });
-    </script>
-    {% endif %}
+      Modal.checkScrollbar = function() {
+        this.bodyIsOverflowing = false;
+        this.scrollbarWidth = 0;
+      };
 
-    <script>
-      $('.modal').on('shown.bs.modal', function() {
-        $(this).find('[autofocus]').focus();
-      });
+      Modal.setScrollbar = function() {
+      };
 
-      $('a[href^="#"]').on('click', function(e) {
-        var target = $(this.getAttribute('href'));
-        if (target.length) {
-          e.preventDefault();
-          $('html, body').stop().animate({
-            scrollTop: target.offset().top - 70
-          }, 600);
-        }
-      });
-    </script>
+      Modal.resetScrollbar = function() {
+        $('body').css('padding-right', '');
+      };
+    }
+  })(jQuery);
+</script>
+
+{% if form.errors %}
+<script>
+  $('#ErrorModal').modal();
+
+  $('#LinkLogin').click(function() {
+    $('#ErrorModal').modal('hide');
+    $('#LoginModal').modal('show');
+    return false;
+  });
+</script>
+{% endif %}
+
+<script>
+  $('.modal').on('shown.bs.modal', function() {
+    $(this).find('[autofocus]').focus();
+  });
+
+  $('a[href^="#"]').on('click', function(e) {
+    var href = $(this).attr('href');
+
+    if (!href || href === '#' || $(this).attr('data-toggle') === 'modal') {
+      return;
+    }
+
+    var target = $(href);
+    if (target.length) {
+      e.preventDefault();
+      $('html, body').stop().animate({
+        scrollTop: target.offset().top - 70
+      }, 600);
+    }
+  });
+</script>
   </body>
 </html>
