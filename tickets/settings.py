@@ -41,7 +41,7 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'crispy_forms',
     'django_apscheduler', 
-    'django_cleanup.apps.CleanupConfig'
+    'django_cleanup.apps.CleanupConfig',
 )
 
 
@@ -119,7 +119,7 @@ EMAIL_TIMEOUT = 10
 
 SITE_BASE_URL = "http://127.0.0.1:8000"
 APSCHEDULER_DATETIME_FORMAT = "N j, Y, f:s a"
-APSCHEDULER_RUN_NOW_TIMEOUT = 25  # seconds
+
 
 # Logging configuration
 log_file_path = config("DJANGO_LOG_FILE", os.path.join(BASE_DIR, "log.txt"))

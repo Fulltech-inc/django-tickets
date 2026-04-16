@@ -8,7 +8,6 @@ import sys
 import signal
 
 
-
 class Command(BaseCommand):
     help = 'Runs the escalation check scheduler manually'
 
@@ -20,12 +19,6 @@ class Command(BaseCommand):
             help='Interval in minutes between escalation checks (default: 2)',
         )
         parser.add_argument(
-            '--base-url',
-            type=str,
-            default='http://127.0.0.1:8000',
-            help='Base URL for ticket links in emails',
-        )
-        parser.add_argument(
             '--once',
             action='store_true',
             help='Run escalation check once and exit (no scheduler)',
@@ -33,8 +26,10 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         interval = options['interval']
-        base_url = options['base_url']
         run_once = options['once']
+        
+        # Using SITE_BASE_URL from settings.py
+        base_url = settings.SITE_BASE_URL
 
         if run_once:
             self.run_single_check(base_url)
@@ -80,7 +75,7 @@ class Command(BaseCommand):
             scheduler.shutdown(wait=False)
             sys.exit(0)
 
-        atexit.register(lambda: scheduler.shutdown(wait=False))
+       
         signal.signal(signal.SIGTERM, shutdown_scheduler)
         signal.signal(signal.SIGINT, shutdown_scheduler)
 
