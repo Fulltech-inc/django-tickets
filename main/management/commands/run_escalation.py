@@ -15,6 +15,7 @@ class Command(BaseCommand):
         parser.add_argument(
             '--interval',
             type=int,
+            #Set the default interval here
             default=2,
             help='Interval in minutes between escalation checks (default: 2)',
         )
