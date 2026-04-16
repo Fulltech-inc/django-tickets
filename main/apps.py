@@ -15,5 +15,6 @@ class MainConfig(AppConfig):
         # Prevent double-start from Django's auto-reloader
         if os.environ.get('RUN_MAIN') != 'true':
             return
+        
 
         
