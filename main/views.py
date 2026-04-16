@@ -144,6 +144,7 @@ def ticket_create_view(request):
             return redirect('inbox')
     else:
         channel_type=request.GET.get('channel_type', '')
+        initial_data = {}
 
         if channel_type == "voice":
             # Extract caller info from GET parameters
@@ -157,11 +158,10 @@ def ticket_create_view(request):
             # caller_name = unquote(caller_name)
 
             # Prepopulate form fields
-            initial_data = {
-                'title': f"Call from {caller_name}" if caller_name else '',
-                'description': f"Channel Type: {channel_type}\nCaller ID: {caller_id}\nCaller Name: {caller_name}\nQueue: {queue}\n\n" if caller_id or caller_name or queue else '',
-                'interaction_id': call_id
-            }
+            initial_data['title'] = f"Call from {caller_name}" if caller_name else ''
+            initial_data['description'] = f"Channel Type: {channel_type}\nCaller ID: {caller_id}\nCaller Name: {caller_name}\nQueue: {queue}\n\n" if caller_id or caller_name or queue else ''
+            initial_data['interaction_id'] = call_id
+            
 
         elif channel_type == "whatsapp":
         
@@ -174,11 +174,9 @@ def ticket_create_view(request):
             lvl2_disposition = request.GET.get('lvl2_disposition', '')
 
             # Prepopulate form fields
-            initial_data = {
-                'title': f"{lvl1_disposition} > {lvl2_disposition}"  if lvl1_disposition else '',
-                'description': f"Channel Type: {channel_type}\nCustomer contact ID: {customer_contact_id}\nCustomer mobile phone: {customer_mobile_phone}\nQueue ID: {queue_id}\n\n" if  customer_mobile_phone or queue_id else '',
-                'interaction_id': f"{interaction_id}"
-            }
+            initial_data['title'] = f"{lvl1_disposition} > {lvl2_disposition}"  if lvl1_disposition else ''
+            initial_data['description'] = f"Channel Type: {channel_type}\nCustomer contact ID: {customer_contact_id}\nCustomer mobile phone: {customer_mobile_phone}\nQueue ID: {queue_id}\n\n" if  customer_mobile_phone or queue_id else ''
+            initial_data['interaction_id'] = f"{interaction_id}"
 
         elif channel_type == "webchat":
         
@@ -190,12 +188,9 @@ def ticket_create_view(request):
             lvl2_disposition = request.GET.get('lvl2_disposition', '')
 
             # Prepopulate form fields
-            initial_data = {
-                'title': f"{lvl1_disposition} > {lvl2_disposition}"  if lvl1_disposition else '',
-                'description': f"Channel Type: {channel_type}\nCustomer contact ID: {customer_contact_id}\nQueue ID: {queue_id}\n\n" if  customer_contact_id or queue_id else '',
-                'interaction_id': f"{interaction_id}"
-            }
-            
+            initial_data['title'] = f"{lvl1_disposition} > {lvl2_disposition}"  if lvl1_disposition else ''
+            initial_data['description'] = f"Channel Type: {channel_type}\nCustomer contact ID: {customer_contact_id}\nQueue ID: {queue_id}\n\n" if  customer_contact_id or queue_id else ''
+            initial_data['interaction_id'] = f"{interaction_id}"
 
         elif channel_type == "facebook":
         
@@ -207,11 +202,9 @@ def ticket_create_view(request):
             lvl2_disposition = request.GET.get('lvl2_disposition', '')
 
             # Prepopulate form fields
-            initial_data = {
-                'title': f"{lvl1_disposition} > {lvl2_disposition}"  if lvl1_disposition else '',
-                'description': f"Channel Type: {channel_type}\nCustomer contact ID: {customer_contact_id}\nQueue ID: {queue_id}\n\n" if  customer_contact_id or queue_id else '',
-                'interaction_id': f"{interaction_id}"
-            }
+            initial_data['title'] = f"{lvl1_disposition} > {lvl2_disposition}"  if lvl1_disposition else ''
+            initial_data['description'] = f"Channel Type: {channel_type}\nCustomer contact ID: {customer_contact_id}\nQueue ID: {queue_id}\n\n" if  customer_contact_id or queue_id else ''
+            initial_data['interaction_id'] = f"{interaction_id}"
 
         elif channel_type == "email":
         
@@ -223,11 +216,9 @@ def ticket_create_view(request):
             lvl2_disposition = request.GET.get('lvl2_disposition', '')
 
             # Prepopulate form fields
-            initial_data = {
-                'title': f"{lvl1_disposition} > {lvl2_disposition}"  if lvl1_disposition else '',
-                'description': f"Channel Type: {channel_type}\nCustomer contact ID: {customer_contact_id}\nQueue ID: {queue_id}\n\n" if  customer_contact_id or queue_id else '',
-                'interaction_id': f"{interaction_id}"
-            }
+            initial_data['title'] = f"{lvl1_disposition} > {lvl2_disposition}"  if lvl1_disposition else ''
+            initial_data['description'] = f"Channel Type: {channel_type}\nCustomer contact ID: {customer_contact_id}\nQueue ID: {queue_id}\n\n" if  customer_contact_id or queue_id else ''
+            initial_data['interaction_id'] = f"{interaction_id}"
 
         form = TicketCreateForm(initial=initial_data)
 
