@@ -120,7 +120,7 @@ def ticket_create_view(request):
             # Send email notification — single clean attempt
             if obj.assigned_to and obj.assigned_to.email:
                 try:
-                    base_url = f"http://{request.get_host()}/ticket/{obj.id}/"
+                    base_url = f"{settings.SITE_BASE_URL}/ticket/{obj.id}/"
                     send_mail(
                         subject=f"Assigned New Ticket[#{obj.id}]: {obj.title}",
                         message=(
@@ -262,7 +262,7 @@ def ticket_edit_view(request, pk):
                 log_activity(data, 'CLOSED', request.user, comment="Ticket closed")
 
             # React to changes
-            base_url = f"http://{request.get_host()}/ticket/{data.id}/"
+            base_url = f"{settings.SITE_BASE_URL}/ticket/{data.id}/"
             if assigned_to_changed:
 
                 notification_subject = f"Assigned Ticket[#{data.id}]"
@@ -344,7 +344,7 @@ def followup_create_view(request):
             notification_subject = f"[#{ticket.id}] New followup"
             notification_body = (
                 f"Hi,\n\nNew followup created for ticket #{ticket.id} "
-                f"(http://{request.get_host()}/ticket/{ticket.id}/)\n\n"
+                f"({settings.SITE_BASE_URL}/ticket/{ticket.id}/)\n\n"
                 f"Title: {form.cleaned_data['title']}\n\n{form.cleaned_data['text']}"
             )
 
