@@ -6,16 +6,14 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="">
+    <meta name="description" content="POSB Ticketing System">
     <meta name="author" content="">
     <link rel="shortcut icon" href="{% static 'img/favicon.png' %}">
     <title>POSB - Ticketing System</title>
 
-    <!-- Bootstrap core CSS -->
     <link href="{% static 'bootstrap/css/bootstrap.css' %}" rel="stylesheet">
     <link href="{% static 'css/frontpage.css' %}" rel="stylesheet">
 
-    <!-- HTML5 shim and Respond.js IE8 support -->
     <!--[if lt IE 9]>
     <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
     <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
@@ -23,82 +21,116 @@
   </head>
   <body>
 
-    <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <div class="navbar navbar-inverse navbar-fixed-top posb-navbar" role="navigation">
       <div class="container">
-        <div class="navbar-header"></div>
-        <div class="collapse navbar-collapse">
-          
-          <!-- Left side - Logo and Title -->
-          <ul class="nav navbar-nav" style="display: flex; align-items: center; margin: 5px 0;">
-            <li style="display: flex; align-items: center;">
-              <img src="{% static 'img/frontpage/posb_logo_large.png' %}"
-                  class="img-responsive"
-                  alt="Django Tickets"
-                  style="height: 40px; width: auto; margin-right: 0px;"><sup style="color: white; font-size: 14px; margin-right: 5px;">&trade;</sup>
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#topNav">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+        </div>
+
+        <div class="collapse navbar-collapse" id="topNav">
+          <ul class="nav navbar-nav posb-brand-wrap">
+            <li class="posb-brand-item">
+              <img src="{% static 'img/frontpage/posb_logo_large.png' %}" class="img-responsive posb-nav-logo" alt="POSB Logo">
             </li>
-            <li>
-              <b style="color: white; font-size: 20px;">
-                Ticketing System
-              </b>
+            <li class="posb-title-item">
+              <span class="posb-system-title">Ticketing System</span>
             </li>
           </ul>
 
-          <!-- Right side - Login -->
-          <ul class="nav navbar-nav navbar-right" style="display: flex; align-items: center; margin: 5px 0;">
+          <ul class="nav navbar-nav navbar-right posb-nav-actions">
             {% if request.user.is_authenticated %}
-              <li><a href="{% url 'inbox' %}" title="Inbox"><i class="fa fa-home"></i></a></li>
-              <li><a href="{% url 'all-tickets' %}" title="All Tickets"><i class="fa fa-list"></i></a></li>
-              <li><a href="{% url 'archive' %}" title="Archive"><i class="fa fa-archive"></i></a></li>
+              <li><a href="{% url 'inbox' %}" title="Inbox"><i class="fa fa-home"></i> Inbox</a></li>
+              <li><a href="{% url 'all-tickets' %}" title="All Tickets"><i class="fa fa-list"></i> Tickets</a></li>
+              <li><a href="{% url 'archive' %}" title="Archive"><i class="fa fa-archive"></i> Archive</a></li>
             {% else %}
-            <li>
-              <a href="#" title="Login" data-toggle="modal" data-target="#LoginModal" 
-                style="color: white; font-size: 17px; padding: 10px 15px;">
-                <b>Login</b>
-              </a>
-            </li>
+              <li>
+                <a href="#" title="Login" data-toggle="modal" data-target="#LoginModal" class="posb-login-link">
+                  <b>Login</b>
+                </a>
+              </li>
             {% endif %}
           </ul>
         </div>
       </div>
     </div>
 
-    <div class="jumbotron jumbotron-carousel corporate-jumbo">
-      <div class="container">
-        <div class="row">
-          <div class="col-md-8 col-sm-12" style="margin-top: 60px;">
-            <h1 style="color: white; display: flex;">
-              <b> With CX </b> <p style="align-self: flex-end; font-size: 20px;"><b> Technology,</b></p> 
-            </h1>
-            <p style="color: white;">Now you can!</p>
+    <div class="jumbotron corporate-jumbo posb-hero">
+      <div class="hero-overlay">
+        <div class="container">
+          <div class="row">
+            <div class="col-lg-7 col-md-8 col-sm-12">
+              <div class="hero-content">
+                <div class="hero-badge">
+                  <img src="{% static 'img/favicon.png' %}" alt="POSB Logo" class="hero-logo">
+                  <span>POSB Ticketing System</span>
+                </div>
+
+                <h1>Manage Support Tickets with Confidence</h1>
+                <p class="hero-subtitle">
+                  A centralised platform for logging, assigning, tracking, and resolving banking support issues efficiently.
+                </p>
+
+                <div class="hero-actions">
+                  <a href="#" class="btn hero-btn-primary" data-toggle="modal" data-target="#LoginModal">Login</a>
+                  <a href="#features" class="btn hero-btn-secondary">Explore Features</a>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </div>
 
-    <div class="container">
-      <div class="row">
-        <div class="col-lg-6">
-          <h2><i class="fa fa-cloud"></i> Web based</h2>
-          <p>This is a web based ticketing application. No local installations needed besides a web browser.</p>
+    <div id="features" class="container ticketing-features-section">
+      <div class="row feature-grid">
+        <div class="col-lg-4 col-md-6 d-flex">
+          <div class="feature-card bank-feature-card w-100">
+            <div class="bank-feature-header">
+              <img src="{% static 'img/favicon.png' %}" alt="POSB Logo" class="bank-feature-logo">
+              <h2>POSB Ticketing Portal</h2>
+            </div>
+            <p>Centralised issue logging and tracking for banking support operations, internal requests, service incidents, and customer-facing resolution workflows.</p>
+          </div>
         </div>
-        <div class="col-lg-6">
-          <h2><i class="fa fa-users"></i> Multi User</h2>
-          <p>Users can create, assign, comment, and manage ticket status collaboratively.</p>
-        </div>
-      </div>
 
-      <div class="row">
-        <div class="col-lg-4">
-          <h2><i class="fa fa-lock"></i> Security</h2>
-          <p>Django's built-in security features are leveraged alongside community best practices.</p>
+        <div class="col-lg-4 col-md-6 d-flex">
+          <div class="feature-card w-100">
+            <h2><i class="fa fa-ticket"></i> Ticket Creation</h2>
+            <p>Capture incidents, service requests, complaints, and operational issues through a structured ticket submission process.</p>
+          </div>
         </div>
-        <div class="col-lg-4">
-          <h2><i class="fa fa-code"></i> Python/Django</h2>
-          <p>Powered by <a href="https://www.python.org/" target="_blank">Python</a> and <a href="https://www.djangoproject.com/" target="_blank">Django</a>.</p>
+
+        <div class="col-lg-4 col-md-6 d-flex">
+          <div class="feature-card w-100">
+            <h2><i class="fa fa-users"></i> Team Collaboration</h2>
+            <p>Allow multiple support users to review, update, comment on, and manage tickets across departments efficiently.</p>
+          </div>
         </div>
-        <div class="col-lg-4">
-          <h2><i class="fa fa-dot-circle-o"></i> Minimal Feature Set</h2>
-          <p>Intentionally lean and extensible; more features may be added incrementally.</p>
+
+        <div class="col-lg-4 col-md-6 d-flex">
+          <div class="feature-card w-100">
+            <h2><i class="fa fa-user-plus"></i> Ticket Assignment</h2>
+            <p>Assign tickets to the right officer, team, or support unit to improve accountability and reduce response delays.</p>
+          </div>
+        </div>
+
+        <div class="col-lg-4 col-md-6 d-flex">
+          <div class="feature-card w-100">
+            <h2><i class="fa fa-clock-o"></i> Status Tracking</h2>
+            <p>Track ticket progress using clear workflow stages such as Open, In Progress, Pending, Escalated, and Resolved.</p>
+          </div>
+        </div>
+
+        <div class="col-lg-4 col-md-6 d-flex">
+          <div class="feature-card w-100">
+            <h2><i class="fa fa-bar-chart"></i> Operational Visibility</h2>
+            <p>Give management and support teams better visibility into ticket volumes, workloads, service performance, and unresolved issues.</p>
+          </div>
         </div>
       </div>
     </div>
@@ -106,79 +138,100 @@
     <div class="container">
       <div class="footer">
         <div class="row">
-          <div class="col-lg-6">
-            <p>Powered by <a href="https://www.djangoproject.com/" target="_blank">Django</a></p>
+          <div class="col-lg-6 col-sm-6">
+            <p>Powered by <a href="https://www.djangoproject.com/" target="_blank" class="footer-brand-link">Django</a></p>
           </div>
-          <div class="col-lg-6 text-right">
-            <p class="mb-2 text-muted">
-              &copy; <a href="https://www.marketmavens.co.zw" target="_blank">Market Mavens</a>
-            </p>
+          <div class="col-lg-6 col-sm-6 text-right footer-right">
+            <p>&copy; {% now "Y" %} <a href="https://www.marketmavens.co.zw" target="_blank" class="footer-brand-link">Market Mavens</a></p>
           </div>
         </div>
       </div>
     </div>
 
     <!-- Login Modal -->
-    <div class="modal fade" id="LoginModal" tabindex="-1" role="dialog" aria-labelledby="LoginModalLabel" aria-hidden="true">
-      <div class="modal-dialog" style="width: 450px;">
+    <div class="modal fade posb-modal" id="LoginModal" tabindex="-1" role="dialog" aria-labelledby="LoginModalLabel" aria-hidden="true">
+      <div class="modal-dialog posb-modal-dialog" role="document">
         <div class="modal-content">
-          <div class="modal-header">
+          <div class="modal-header posb-modal-header">
             <button type="button" class="close" data-dismiss="modal">
               <span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
             </button>
-            <h4 class="modal-title">Please sign in</h4>
+            <div class="modal-brand">
+              <img src="{% static 'img/favicon.png' %}" alt="POSB Logo" class="modal-brand-logo">
+              <h4 class="modal-title" id="LoginModalLabel">Sign in to POSB Ticketing System</h4>
+            </div>
           </div>
           <div class="modal-body">
             <form class="form-signin" method="post" action="{% url 'login' %}">
               {% csrf_token %}
-              <input type="text" id="username" name="username" class="form-control" placeholder="User name" required autofocus>
-              <input type="password" id="password" name="password" class="form-control" placeholder="Password" required>
-              <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
+
+              <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" class="form-control" placeholder="Enter username" required autofocus>
+              </div>
+
+              <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" class="form-control" placeholder="Enter password" required>
+              </div>
+
+              <button class="btn btn-lg btn-primary btn-block posb-signin-btn" type="submit">Sign in</button>
               <input type="hidden" name="next" value="{{ next }}" />
             </form>
           </div>
-          <div class="modal-footer text-left">
-            Forgot your password?
+          <div class="modal-footer text-left posb-modal-footer">
+            Forgot your password? Contact your system administrator.
           </div>
         </div>
       </div>
     </div>
 
     <!-- Error Modal -->
-    <div class="modal fade" id="ErrorModal" tabindex="-1" role="dialog" aria-labelledby="ErrorModalLabel" aria-hidden="true">
-      <div class="modal-dialog" style="width: 450px;">
+    <div class="modal fade posb-modal" id="ErrorModal" tabindex="-1" role="dialog" aria-labelledby="ErrorModalLabel" aria-hidden="true">
+      <div class="modal-dialog posb-modal-dialog" role="document">
         <div class="modal-content">
           <div class="modal-body">
-            <div class="alert alert-danger" role="alert" style="background: #f1f1f1;">
-              <i class="fa fa-frown-o" style="float: right; color: red; padding: 10px; margin-left: 10px; font-size: 80px;"></i>
-              <b>Ooooops!</b><br/>
-              Your credentials are invalid! Please
-              <a href="#" data-toggle="modal" data-target="#LoginModal" id="LinkLogin">try again</a>.
-              If you have any questions, please do not contact me.
+            <div class="alert alert-danger posb-error-alert" role="alert">
+              <i class="fa fa-warning posb-error-icon"></i>
+              <div class="posb-error-content">
+                <b>Login failed.</b><br>
+                Your credentials are invalid. Please
+                <a href="#" data-toggle="modal" data-target="#LoginModal" id="LinkLogin">try again</a>.
+              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Scripts -->
     <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
     <script src="{% static 'bootstrap/js/bootstrap.min.js' %}"></script>
 
     {% if form.errors %}
     <script>
       $('#ErrorModal').modal();
+
       $('#LinkLogin').click(function() {
-          $('#ErrorModal').modal('hide');
-          $('#LoginModal').modal('show');
-          return false;
+        $('#ErrorModal').modal('hide');
+        $('#LoginModal').modal('show');
+        return false;
       });
     </script>
     {% endif %}
 
     <script>
       $('.modal').on('shown.bs.modal', function() {
-          $(this).find('[autofocus]').focus();
+        $(this).find('[autofocus]').focus();
+      });
+
+      $('a[href^="#"]').on('click', function(e) {
+        var target = $(this.getAttribute('href'));
+        if (target.length) {
+          e.preventDefault();
+          $('html, body').stop().animate({
+            scrollTop: target.offset().top - 70
+          }, 600);
+        }
       });
     </script>
   </body>

@@ -105,8 +105,12 @@
   </a>
 
   <div class="posb-nav-links">
-    <a class="posb-nav-link {% if request.resolver_match.url_name == 'inbox' %}active{% endif %}" href="{% url 'inbox' %}">
+    <a class="posb-nav-link {% if request.resolver_match.url_name == 'login' %}active{% endif %}" href="{% url 'login' %}">
       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6.5L8 2l6 4.5V14a1 1 0 01-1 1H3a1 1 0 01-1-1V6.5z"/><path d="M6 15V9h4v6"/></svg>
+      <span>Home</span>
+    </a>
+    <a class="posb-nav-link {% if request.resolver_match.url_name == 'inbox' %}active{% endif %}" href="{% url 'inbox' %}">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="5" r="3"></circle><path d="M2.5 14c0-2.5 2.5-4 5.5-4s5.5 1.5 5.5 4"></path></svg>
       <span>Inbox</span>
     </a>
     <a class="posb-nav-link {% if request.resolver_match.url_name == 'all-tickets' %}active{% endif %}" href="{% url 'all-tickets' %}">
