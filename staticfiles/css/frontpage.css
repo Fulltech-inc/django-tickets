@@ -1,93 +1,556 @@
 @import "//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css";
 
-     body {
-       padding-top: 50px;
-     }
-     .starter-template {
-       padding: 40px 15px;
-       text-align: center;
-     }
-     .footer {
-       padding-top: 40px;
-       padding-bottom: 40px;
-       margin-top: 40px;
-       border-top: 1px solid #eee;
-     }
-     .alert {
-       margin-bottom: 0;
-     }
-     .help-block {
-       display: none;
-     }
-     .navbar-form {
-       margin-right: 0;
-     }
-     /* Home page styling */
-     .corporate-jumbo {
-         background-image: url('/static/img/frontpage/mt-fuji-477832_1280.jpg');
-         background-repeat: no-repeat;
-         background-attachment: fixed;
-         background-position: 0 0;
-         -webkit-background-size: cover;
-         background-size: cover;
-         color: #f5f5f5;
-     }
-     .corporate-jumbo .well {
-       background-color: rgba(245, 245, 245, .7);
-     }
-     .corporate-jumbo p, .corporate-jumbo h1 {
-       color: #eee;
-       text-shadow: 0px 0px 2px black;
-     }
-     .corporate-jumbo p {
-       font-weight: 500;
-     }
-     .corporate-jumbo .well legend {
-       color: #333;
-     }
-     .contact-banner {
-       padding: 100px 0;
-       background: #e0e0e0;
-       margin-top: 100px;
-     }
-     .footer a:hover {
-       text-decoration: none;
-     }
+html {
+  overflow-y: scroll;
+  scrollbar-gutter: stable;
+}
 
+body {
+  padding-top: 50px;
+  background: #f4f4f4;
+  color: #1f2937;
+  overflow-x: hidden;
+  padding-right: 0 !important;
+}
+
+body.modal-open {
+  overflow: hidden;
+  padding-right: 0 !important;
+}
+
+.navbar-fixed-top,
+.navbar-fixed-bottom {
+  padding-right: 0 !important;
+}
+
+.starter-template {
+  padding: 40px 15px;
+  text-align: center;
+}
+
+.footer {
+  padding-top: 30px;
+  padding-bottom: 30px;
+  margin-top: 30px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.footer p {
+  margin-bottom: 0;
+  color: #374151;
+}
+
+.footer a:hover {
+  text-decoration: none;
+}
+
+.footer-right {
+  text-align: right;
+}
+
+.alert {
+  margin-bottom: 0;
+}
+
+.help-block {
+  display: none;
+}
+
+.navbar-form {
+  margin-right: 0;
+}
+
+/* Navbar */
+.posb-navbar {
+  background: #1e1e1e;
+  border: none;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.12);
+}
+
+.posb-brand-wrap {
+  display: flex !important;
+  align-items: center;
+  margin: 0;
+}
+
+.posb-brand-item,
+.posb-title-item {
+  display: flex !important;
+  align-items: center;
+}
+
+.posb-nav-logo {
+  height: 40px;
+  width: auto;
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
+
+.posb-system-title {
+  display: inline-block;
+  color: #ffffff;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 50px;
+  margin-left: 12px;
+}
+
+.posb-nav-actions > li > a,
+.posb-login-link {
+  color: #ffffff !important;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.posb-nav-actions > li > a:hover,
+.posb-login-link:hover {
+  color: #F47C20 !important;
+  background: transparent !important;
+}
+
+/* Hero */
+.corporate-jumbo {
+  color: #f5f5f5;
+}
+
+.posb-hero {
+  position: relative;
+  margin-bottom: 0;
+  min-height: 380px;
+  overflow: hidden;
+  background-image: linear-gradient(rgba(15, 23, 42, 0.55), rgba(15, 23, 42, 0.45)), url('/static/img/frontpage/mt-fuji-477832_1280.jpg');
+  background-repeat: no-repeat;
+  background-position: center center !important;
+  background-size: cover;
+  background-attachment: scroll;
+  border-radius: 0;
+}
+
+.posb-hero .hero-overlay {
+  width: 100%;
+  min-height: 380px;
+  display: flex;
+  align-items: center;
+}
+
+.posb-hero .hero-content {
+  color: #ffffff;
+  padding: 70px 0;
+}
+
+.posb-hero .hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(244, 124, 32, 0.96);
+  color: #ffffff;
+  padding: 10px 16px;
+  border-radius: 12px;
+  margin-bottom: 24px;
+  font-size: 15px;
+  font-weight: 700;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.20);
+}
+
+.posb-hero .hero-logo {
+  width: 34px;
+  height: 34px;
+  object-fit: contain;
+  background: #ffffff;
+  border-radius: 6px;
+  padding: 3px;
+  flex-shrink: 0;
+}
+
+.posb-hero h1 {
+  font-size: 48px;
+  font-weight: 700;
+  line-height: 1.15;
+  margin: 0 0 18px 0;
+  color: #ffffff;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+}
+
+.posb-hero .hero-subtitle {
+  font-size: 20px;
+  line-height: 1.6;
+  max-width: 650px;
+  margin-bottom: 30px;
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.posb-hero .hero-actions {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.posb-hero .hero-btn-primary,
+.posb-hero .hero-btn-secondary {
+  padding: 12px 24px;
+  font-size: 15px;
+  font-weight: 600;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.posb-hero .hero-btn-primary {
+  background: #F47C20;
+  color: #ffffff;
+  border: 2px solid #F47C20;
+}
+
+.posb-hero .hero-btn-primary:hover,
+.posb-hero .hero-btn-primary:focus {
+  background: #df6e14;
+  border-color: #df6e14;
+  color: #ffffff;
+}
+
+.posb-hero .hero-btn-secondary {
+  background: transparent;
+  color: #ffffff;
+  border: 2px solid rgba(255, 255, 255, 0.85);
+}
+
+.posb-hero .hero-btn-secondary:hover,
+.posb-hero .hero-btn-secondary:focus {
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+}
+
+/* Features */
+.ticketing-features-section {
+  padding: 30px 0 10px 0;
+}
+
+.ticketing-features-section .feature-grid {
+  display: flex;
+  flex-wrap: wrap;
+  margin-left: -10px;
+  margin-right: -10px;
+}
+
+.ticketing-features-section .feature-grid > [class*="col-"] {
+  padding-left: 10px;
+  padding-right: 10px;
+  margin-bottom: 20px;
+  display: flex;
+}
+
+.ticketing-features-section .feature-card {
+  background: #ffffff;
+  border: 1px solid #f1d2ba;
+  border-top: 3px solid #F47C20;
+  border-radius: 14px;
+  padding: 26px 20px;
+  width: 100%;
+  min-height: 190px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.ticketing-features-section .feature-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+}
+
+.ticketing-features-section .feature-card h2 {
+  font-size: 19px;
+  font-weight: 700;
+  margin: 0 0 16px 0;
+  color: #1f2937;
+  line-height: 1.35;
+  display: flex;
+  align-items: center;
+}
+
+.ticketing-features-section .feature-card h2 i {
+  color: #F47C20;
+  margin-right: 12px;
+  font-size: 20px;
+  min-width: 22px;
+}
+
+.ticketing-features-section .feature-card p {
+  font-size: 15px;
+  line-height: 1.75;
+  color: #5b6472;
+  margin: 0;
+}
+
+.ticketing-features-section .bank-feature-card {
+  background: linear-gradient(135deg, #F47C20 0%, #ea7418 100%);
+  border: none;
+  min-height: 190px;
+}
+
+.ticketing-features-section .bank-feature-card h2,
+.ticketing-features-section .bank-feature-card p {
+  color: #ffffff;
+}
+
+.ticketing-features-section .bank-feature-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+
+.ticketing-features-section .bank-feature-header h2 {
+  margin: 0;
+  font-size: 18px;
+  line-height: 1.3;
+}
+
+.ticketing-features-section .bank-feature-logo {
+  width: 56px;
+  height: 56px;
+  object-fit: contain;
+  background: #ffffff;
+  padding: 6px;
+  border-radius: 10px;
+  flex-shrink: 0;
+}
+
+/* Contact Banner */
+.contact-banner {
+  padding: 100px 0;
+  background: #e0e0e0;
+  margin-top: 100px;
+}
 
 /* Login Form */
-
 .form-signin {
-  max-width: 330px;
-  padding: 15px;
+  max-width: 100%;
+  padding: 10px 0 0 0;
   margin: 0 auto;
 }
+
 .form-signin .form-signin-heading,
 .form-signin .checkbox {
   margin-bottom: 10px;
 }
+
 .form-signin .checkbox {
   font-weight: normal;
 }
+
 .form-signin .form-control {
   position: relative;
-  height: auto;
-  -webkit-box-sizing: border-box;
-     -moz-box-sizing: border-box;
-          box-sizing: border-box;
-  padding: 10px;
-  font-size: 16px;
+  height: 46px;
+  box-sizing: border-box;
+  padding: 10px 14px;
+  font-size: 15px;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  box-shadow: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
+
 .form-signin .form-control:focus {
   z-index: 2;
+  border-color: #F47C20;
+  box-shadow: 0 0 0 3px rgba(244, 124, 32, 0.12);
 }
-.form-signin input[type="text"] {
-  margin-bottom: -1px;
-  border-bottom-right-radius: 0;
-  border-bottom-left-radius: 0;
-}
+
+.form-signin input[type="text"],
 .form-signin input[type="password"] {
-  margin-bottom: 10px;
-  border-top-left-radius: 0;
-  border-top-right-radius: 0;
+  margin-bottom: 0;
+}
+
+.form-signin label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 8px;
+  display: block;
+}
+
+/* Modal */
+.posb-modal-dialog {
+  width: 450px;
+  max-width: 95%;
+  margin: 60px auto;
+}
+
+.posb-modal .modal-content {
+  border: none;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.18);
+}
+
+.posb-modal-header {
+  background: #f8fafc;
+  border-bottom: 1px solid #e5e7eb;
+  padding: 18px 20px;
+}
+
+.modal-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-right: 25px;
+}
+
+.modal-brand-logo {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  background: #F47C20;
+  border-radius: 8px;
+  padding: 4px;
+}
+
+.posb-modal .modal-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0;
+}
+
+.posb-modal .modal-body {
+  padding: 24px 20px;
+}
+
+.posb-modal-footer {
+  background: #fafafa;
+  color: #6b7280;
+  border-top: 1px solid #e5e7eb;
+  font-size: 14px;
+  padding: 14px 20px;
+}
+
+.posb-signin-btn {
+  background: #F47C20;
+  border-color: #F47C20;
+  border-radius: 8px;
+  height: 46px;
+  font-size: 15px;
+  font-weight: 600;
+  margin-top: 6px;
+}
+
+.posb-signin-btn:hover,
+.posb-signin-btn:focus {
+  background: #df6e14;
+  border-color: #df6e14;
+}
+
+.posb-error-alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  background: #fff7f7;
+  border: 1px solid #f5c2c7;
+  color: #842029;
+  border-radius: 10px;
+  padding: 18px;
+}
+
+.posb-error-icon {
+  font-size: 36px;
+  color: #dc3545;
+  line-height: 1;
+  margin-top: 2px;
+}
+
+.posb-error-content a {
+  color: #b02a37;
+  font-weight: 600;
+}
+
+/* Footer */
+.footer .footer-brand-link {
+  color: #F47C20;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.footer .footer-brand-link:hover,
+.footer .footer-brand-link:focus {
+  color: #df6e14;
+  text-decoration: none;
+}
+
+/* Responsive */
+@media (max-width: 991px) {
+  .posb-hero {
+    min-height: 320px;
+    background-attachment: scroll;
+  }
+
+  .posb-hero .hero-overlay {
+    min-height: 320px;
+  }
+
+  .posb-hero h1 {
+    font-size: 38px;
+  }
+
+  .posb-hero .hero-subtitle {
+    font-size: 18px;
+  }
+
+  .ticketing-features-section .feature-card {
+    min-height: auto;
+  }
+}
+
+@media (max-width: 767px) {
+  .posb-brand-wrap,
+  .posb-nav-actions {
+    float: none !important;
+  }
+
+  .posb-system-title {
+    line-height: normal;
+    margin-top: 14px;
+    margin-bottom: 14px;
+  }
+
+  .footer-right {
+    text-align: left;
+    margin-top: 10px;
+  }
+
+  .posb-modal-dialog {
+    width: auto;
+    margin: 30px 15px;
+  }
+}
+
+@media (max-width: 576px) {
+  .posb-hero .hero-content {
+    padding: 50px 0;
+  }
+
+  .posb-hero h1 {
+    font-size: 30px;
+  }
+
+  .posb-hero .hero-subtitle {
+    font-size: 16px;
+  }
+
+  .posb-hero .hero-badge {
+    font-size: 14px;
+    padding: 8px 12px;
+  }
+
+  .posb-hero .hero-actions {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .posb-hero .hero-btn-primary,
+  .posb-hero .hero-btn-secondary {
+    width: auto;
+  }
+
+  .ticketing-features-section .bank-feature-header {
+    align-items: flex-start;
+  }
 }
