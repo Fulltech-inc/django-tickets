@@ -86,7 +86,7 @@ DATABASES = {
 
 # Internationalization
 LANGUAGE_CODE = 'en-us'
-TIME_ZONE = 'Europe/Berlin'
+TIME_ZONE = "Africa/Harare"
 USE_I18N = True
 USE_TZ = True
 # USE_L10N is deprecated in Django 5.0+ but harmless if left in
