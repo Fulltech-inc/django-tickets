@@ -17,7 +17,24 @@ class UserSettingsForm(forms.ModelForm):
 class TicketCreateForm(forms.ModelForm):
     class Meta:
         model = Ticket
-        fields = ('interaction_id', 'category', 'sub_category', 'title', 'description', 'assigned_to')
+        fields = (
+            'interaction_id',
+            'channel',
+            'queue',
+            'customer_name',
+            'usd_customer_account_number',
+            'zwg_customer_account_number',
+            'customer_gender',
+            'customer_phone_number',
+            'customer_email',
+            'other_customer_contact',
+
+            'category',
+            'sub_category',
+            'title',
+            'description',
+            'assigned_to'
+            )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -52,7 +69,26 @@ class TicketCreateForm(forms.ModelForm):
 class TicketEditForm(forms.ModelForm):
     class Meta:
         model = Ticket
-        fields = ('interaction_id', 'category', 'sub_category', 'title', 'description', 'status', 'waiting_for', 'assigned_to')
+        fields = (
+            'interaction_id',
+            'channel',
+            'queue',
+            'customer_name',
+            'usd_customer_account_number',
+            'zwg_customer_account_number',
+            'customer_gender',
+            'customer_phone_number',
+            'customer_email',
+            'other_customer_contact',
+
+            'category',
+            'sub_category',
+            'title',
+            'description',
+            'status',
+            'waiting_for',
+            'assigned_to'
+            )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

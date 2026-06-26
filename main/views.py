@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # Standard library
-import csv
-import logging
+import logging, requests, json, csv
 from datetime import timedelta
 from io import BytesIO
 from urllib.parse import unquote
@@ -36,7 +35,6 @@ from .models import (
     TicketActivity,
     TicketEscalation,
 )
-
 
 logger = logging.getLogger(__name__)
 
@@ -143,82 +141,140 @@ def ticket_create_view(request):
 
             return redirect('inbox')
     else:
-        channel_type=request.GET.get('channel_type', '')
+
+        def get_contact_information(channel_type, queue_id, customer_contact_id):
+            
+            try:
+                cm_url = f"{settings.XCALLY_BASE_URL}/api/cm/contacts/{customer_contact_id}"
+                qu_url = f"{settings.XCALLY_BASE_URL}/api/{channel_type}/queues/{queue_id}"
+
+                cm_response = requests.get(cm_url, params={"apikey": settings.XCALLY_API_TOKEN}, headers={"accept": "application/json"},timeout=30)
+                qu_response = requests.get(qu_url, params={"apikey": settings.XCALLY_API_TOKEN}, headers={"accept": "application/json"},timeout=30)
+
+                cm_response.raise_for_status()
+                qu_response.raise_for_status()
+
+                cm_data = cm_response.json()
+                qu_data = qu_response.json()
+
+                print(json.dumps(cm_data, indent=4))
+                print(json.dumps(qu_data, indent=4))
+
+                return cm_data, qu_data
+
+            except requests.exceptions.HTTPError as e:
+                print(f"HTTP Error: {e}")
+                print(cm_response.text)
+                print(qu_response.text)
+
+            except requests.exceptions.ConnectionError:
+                print("Connection error. Unable to reach the server.")
+
+            except requests.exceptions.Timeout:
+                print("The request timed out.")
+
+            except requests.exceptions.RequestException as e:
+                print(f"Request failed: {e}")
+
         initial_data = {}
+        channel_type=request.GET.get('channel_type', '')
 
         if channel_type == "voice":
-            # Extract caller info from GET parameters
-            call_id = request.GET.get('call_id', '')
-            caller_id = request.GET.get('caller_id', '')
-            caller_name = request.GET.get('caller_name', '')
-            queue = request.GET.get('queue', '')
-
-            # Optional: Decode URL-encoded values
-            # caller_id = unquote(caller_id)
-            # caller_name = unquote(caller_name)
-
+            
             # Prepopulate form fields
-            initial_data['title'] = f"Call from {caller_name}" if caller_name else ''
-            initial_data['description'] = f"Channel Type: {channel_type}\nCaller ID: {caller_id}\nCaller Name: {caller_name}\nQueue: {queue}\n\n" if caller_id or caller_name or queue else ''
-            initial_data['interaction_id'] = call_id
+            initial_data['title'] = f"Call from {request.GET.get('caller_name', '')}" if request.GET.get('caller_name', '') else ''
+            initial_data['channel'] = channel_type
+            initial_data['interaction_id'] = request.GET.get('call_id', '')
+
+            initial_data['queue'] = request.GET.get('queue', '')
+            initial_data['customer_name'] = request.GET.get('caller_name', '')
+            initial_data['customer_phone_number'] = request.GET.get('caller_id', '')
+            initial_data['other_customer_contact'] = request.GET.get('caller_id', '')
             
 
         elif channel_type == "whatsapp":
-        
-            # Extract caller info from GET parameters
-            queue_id = request.GET.get('queue_id', '')
-            interaction_id = request.GET.get('interaction_id', '')
-            customer_contact_id = request.GET.get('contact_id', '')
-            customer_mobile_phone = request.GET.get('phone', '')
-            lvl1_disposition = request.GET.get('lvl1_disposition', '')
-            lvl2_disposition = request.GET.get('lvl2_disposition', '')
 
             # Prepopulate form fields
-            initial_data['title'] = f"{lvl1_disposition} > {lvl2_disposition}"  if lvl1_disposition else ''
-            initial_data['description'] = f"Channel Type: {channel_type}\nCustomer contact ID: {customer_contact_id}\nCustomer mobile phone: {customer_mobile_phone}\nQueue ID: {queue_id}\n\n" if  customer_mobile_phone or queue_id else ''
-            initial_data['interaction_id'] = f"{interaction_id}"
+            initial_data['title'] = f"{request.GET.get('lvl1_disposition', '')} > {request.GET.get('lvl2_disposition', '')}"  if request.GET.get('lvl1_disposition', '') else ''
+            initial_data['interaction_id'] = request.GET.get('interaction_id', '')
+            initial_data['channel'] = channel_type
 
-        elif channel_type == "webchat":
-        
-            # Extract caller info from GET parameters
-            queue_id = request.GET.get('queue_id', '')
-            interaction_id = request.GET.get('interaction_id', '')
-            customer_contact_id = request.GET.get('contact_id', '')
-            lvl1_disposition = request.GET.get('lvl1_disposition', '')
-            lvl2_disposition = request.GET.get('lvl2_disposition', '')
+            cm_data, qu_data = get_contact_information(channel_type, request.GET.get('queue_id', ''), request.GET.get('contact_id', ''))
 
-            # Prepopulate form fields
-            initial_data['title'] = f"{lvl1_disposition} > {lvl2_disposition}"  if lvl1_disposition else ''
-            initial_data['description'] = f"Channel Type: {channel_type}\nCustomer contact ID: {customer_contact_id}\nQueue ID: {queue_id}\n\n" if  customer_contact_id or queue_id else ''
-            initial_data['interaction_id'] = f"{interaction_id}"
+            initial_data['queue'] = qu_data["rows"][0].get('name', '')
+            initial_data['customer_name'] = f"{cm_data.get('firstName', '')} {cm_data.get('lastName', '')}"
+            initial_data['usd_customer_account_number'] = cm_data.get('cf_7', '')
+            initial_data['zwg_customer_account_number'] = cm_data.get('cf_8', '')
+            initial_data['customer_gender'] = cm_data.get('cf_3', '')
+            initial_data['customer_phone_number'] = cm_data.get('phone', '')
+            initial_data['customer_email'] = cm_data.get('email', '')
+            initial_data['other_customer_contact'] = cm_data.get('mobile', '')
 
-        elif channel_type == "facebook":
-        
-            # Extract caller info from GET parameters
-            queue_id = request.GET.get('queue_id', '')
-            interaction_id = request.GET.get('interaction_id', '')
-            customer_contact_id = request.GET.get('contact_id', '')
-            lvl1_disposition = request.GET.get('lvl1_disposition', '')
-            lvl2_disposition = request.GET.get('lvl2_disposition', '')
+            
+        elif channel_type == "chat":
 
             # Prepopulate form fields
-            initial_data['title'] = f"{lvl1_disposition} > {lvl2_disposition}"  if lvl1_disposition else ''
-            initial_data['description'] = f"Channel Type: {channel_type}\nCustomer contact ID: {customer_contact_id}\nQueue ID: {queue_id}\n\n" if  customer_contact_id or queue_id else ''
-            initial_data['interaction_id'] = f"{interaction_id}"
+            initial_data['title'] = f"{request.GET.get('lvl1_disposition', '')} > {request.GET.get('lvl2_disposition', '')}"  if request.GET.get('lvl1_disposition', '') else ''
+            initial_data['interaction_id'] = request.GET.get('interaction_id', '')
+            initial_data['channel'] = channel_type
 
-        elif channel_type == "email":
+            cm_data, qu_data = get_contact_information(channel_type, request.GET.get('queue_id', ''), request.GET.get('contact_id', ''))
+
+            initial_data['queue'] = qu_data["rows"][0].get('name', '')
+            initial_data['customer_name'] = f"{cm_data.get('firstName', '')} {cm_data.get('lastName', '')}"
+            initial_data['usd_customer_account_number'] = cm_data.get('cf_7', '')
+            initial_data['zwg_customer_account_number'] = cm_data.get('cf_8', '')
+            initial_data['customer_gender'] = cm_data.get('cf_3', '')
+            initial_data['customer_phone_number'] = cm_data.get('phone', '')
+            initial_data['customer_email'] = cm_data.get('email', '')
+            initial_data['other_customer_contact'] = cm_data.get('email', '')
+
+
+        elif channel_type == "openchannel":
+
+            sub_channel=request.GET.get('sub_channel', '')
         
-            # Extract caller info from GET parameters
-            queue_id = request.GET.get('queue_id', '')
-            interaction_id = request.GET.get('interaction_id', '')
-            customer_contact_id = request.GET.get('contact_id', '')
-            lvl1_disposition = request.GET.get('lvl1_disposition', '')
-            lvl2_disposition = request.GET.get('lvl2_disposition', '')
-
             # Prepopulate form fields
-            initial_data['title'] = f"{lvl1_disposition} > {lvl2_disposition}"  if lvl1_disposition else ''
-            initial_data['description'] = f"Channel Type: {channel_type}\nCustomer contact ID: {customer_contact_id}\nQueue ID: {queue_id}\n\n" if  customer_contact_id or queue_id else ''
-            initial_data['interaction_id'] = f"{interaction_id}"
+            initial_data['title'] = f"{request.GET.get('lvl1_disposition', '')} > {request.GET.get('lvl2_disposition', '')}"  if request.GET.get('lvl1_disposition', '') else ''
+            initial_data['interaction_id'] = request.GET.get('interaction_id', '')
+            initial_data['channel'] = sub_channel
+
+            cm_data, qu_data = get_contact_information(channel_type, request.GET.get('queue_id', ''), request.GET.get('contact_id', ''))
+
+            initial_data['queue'] = qu_data["rows"][0].get('name', '')
+            initial_data['customer_name'] = f"{cm_data.get('firstName', '')} {cm_data.get('lastName', '')}"
+            initial_data['usd_customer_account_number'] = cm_data.get('cf_7', '')
+            initial_data['zwg_customer_account_number'] = cm_data.get('cf_8', '')
+            initial_data['customer_gender'] = cm_data.get('cf_3', '')
+            initial_data['customer_phone_number'] = cm_data.get('phone', '')
+            initial_data['customer_email'] = cm_data.get('email', '')
+
+            if sub_channel == "facebook":
+                initial_data['other_customer_contact'] = cm_data.get('facebook', '')
+            elif sub_channel == "instagram":
+                initial_data['other_customer_contact'] = cm_data.get('instagram', '')
+            elif sub_channel == "twitter":
+                initial_data['other_customer_contact'] = cm_data.get('twitter', '')
+            elif sub_channel == "sms":
+                initial_data['other_customer_contact'] = cm_data.get('phone', '')
+
+        elif channel_type == "mail":
+        
+            # Prepopulate form fields
+            initial_data['title'] = f"{request.GET.get('lvl1_disposition', '')} > {request.GET.get('lvl2_disposition', '')}"  if request.GET.get('lvl1_disposition', '') else ''
+            initial_data['interaction_id'] = request.GET.get('interaction_id', '')
+            initial_data['channel'] = channel_type
+
+            cm_data, qu_data = get_contact_information(channel_type, request.GET.get('queue_id', ''), request.GET.get('contact_id', ''))
+
+            initial_data['queue'] = qu_data["rows"][0].get('name', '')
+            initial_data['customer_name'] = f"{cm_data.get('firstName', '')} {cm_data.get('lastName', '')}"
+            initial_data['usd_customer_account_number'] = cm_data.get('cf_7', '')
+            initial_data['zwg_customer_account_number'] = cm_data.get('cf_8', '')
+            initial_data['customer_gender'] = cm_data.get('cf_3', '')
+            initial_data['customer_phone_number'] = cm_data.get('phone', '')
+            initial_data['customer_email'] = cm_data.get('email', '')
+            initial_data['other_customer_contact'] = cm_data.get('email', '')
 
         form = TicketCreateForm(initial=initial_data)
 

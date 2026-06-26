@@ -127,6 +127,8 @@ EMAIL_TIMEOUT = 10
 SITE_BASE_URL = config("SITE_BASE_URL_HOST", "http://127.0.0.1:8000")
 APSCHEDULER_DATETIME_FORMAT = "N j, Y, f:s a"
 
+XCALLY_BASE_URL = config("XCALLY_BASE_URL", "https://example.com")
+XCALLY_API_TOKEN = config("XCALLY_API_TOKEN", "your_api_token_here")
 
 # Logging configuration
 log_file_path = config("DJANGO_LOG_FILE", os.path.join(BASE_DIR, "log.txt"))

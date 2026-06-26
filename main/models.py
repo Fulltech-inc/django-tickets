@@ -35,7 +35,13 @@ class Ticket(models.Model):
         ('WAITING', 'WAITING'),
         ('DONE', 'DONE'),
     )
-    interaction_id = models.CharField(max_length=100, blank=True, null=True, help_text="XCALLY Interaction ID")
+
+    GENDER_CHOICES = (
+        ('M', 'Male'),
+        ('F', 'Female'),
+    )
+
+    interaction_id = models.CharField('Interaction ID', max_length=100, blank=True, null=True, help_text="XCALLY Interaction ID")
     title = models.CharField('Title', max_length=255)
     owner = models.ForeignKey(User, related_name='tickets_owned', null=True, verbose_name='Owner', on_delete=models.SET_NULL)
     description = models.TextField('Description', null=True)
@@ -58,6 +64,15 @@ class Ticket(models.Model):
         verbose_name='Sub Category', related_name='sub_tickets'
     )
 
+    channel = models.CharField('Channel', max_length=100, blank=True, null=True)
+    queue = models.CharField('Queue', max_length=100, blank=True, null=True)
+    customer_name = models.CharField('Customer Name', max_length=255, blank=True, null=True)
+    usd_customer_account_number = models.CharField('USD Customer Account Number', max_length=100, blank=True, null=True)
+    zwg_customer_account_number = models.CharField('ZWG Customer Account Number', max_length=100, blank=True, null=True)
+    customer_gender = models.CharField('Customer Gender (M/F)', choices=GENDER_CHOICES, max_length=255, blank=True, null=True)
+    customer_phone_number = models.CharField('Customer Phone Number', max_length=20, blank=True, null=True)
+    customer_email = models.EmailField('Customer Email', blank=True, null=True)
+    other_customer_contact = models.CharField('Other Customer Contact', max_length=255, blank=True, null=True)
 
     def __str__(self):
         return f"Ticket #{self.id}: {self.title}"
