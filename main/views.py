@@ -669,7 +669,18 @@ def export_reports_excel(request):
     # REMOVED COLUMNS: Owner, Escalated To, Escalated From, Escalated At, Escalation Acknowledged At, Follow-up Count, Attachment Count
     writer.writerow([
         'Ticket ID',
+
         'Interaction ID',
+        'Channel',
+        'Queue',
+        'Customer Name',
+        'USD Customer Account Number',
+        'ZWG Customer Account Number',
+        'Customer Gender',
+        'Customer Phone Number',
+        'Customer Email',
+        'Other Customer Contact',
+
         'Title',
         'Description',
         'Status',
