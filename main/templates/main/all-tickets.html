@@ -96,7 +96,7 @@
                         <td>{{ ticket.owner }}</td>
                         <td>{{ ticket.assigned_to|default:"---" }}</td>
                         <td>{{ ticket.title }}</td>
-                        <td>{{ ticket.description }}</td>
+                        <td>{{ ticket.description|truncatechars:20 }}</td>
                         <td>{{ ticket.created }}</td>
                         <td>
                             {% with ticket.attachment_set.all as attachments %}

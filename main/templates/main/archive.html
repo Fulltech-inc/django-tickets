@@ -33,7 +33,7 @@
                 <thead>
                     <tr>
                         <th>ID</th>
-                        
+
                         <th>Interaction ID</th>
                         <th>Channel</th>
                         <th>Queue</th>
@@ -81,7 +81,7 @@
                         <td>{{ ticket.category.name|default:"---" }}</td>
                         <td>{{ ticket.sub_category.name|default:"---" }}</td>
                         <td>{{ ticket.title }}</td>
-                        <td>{{ ticket.description }}</td>
+                        <td>{{ ticket.description|truncatechars:20 }}</td>
                         <td>{{ ticket.closed_date|date:"d.m.Y, G:i" }}</td>
                         <td>{{ ticket.created }}</td>
                     </tr>

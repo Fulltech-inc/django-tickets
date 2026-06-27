@@ -107,7 +107,7 @@ $(document).ready(function() {
                             <td>{{ ticket.owner|default:"---" }}</td>
                             <td>{{ ticket.assigned_to|default:"---" }}</td>
                             <td>{{ ticket.title }}</td>
-                            <td>{{ ticket.description }}</td>
+                            <td>{{ ticket.description|truncatechars:20 }}</td>
                             <td>{{ ticket.created }}</td>
 
                             <td>
@@ -201,7 +201,7 @@ $(document).ready(function() {
                         <td>{{ ticket.sub_category.name|default:"---" }}</td>
                         <td>{{ ticket.owner|default:"---" }}</td>
                         <td>{{ ticket.title }}</td>
-                        <td>{{ ticket.description }}</td>
+                        <td>{{ ticket.description|truncatechars:20 }}</td>
                         <td>{{ ticket.created }}</td>
 
                         <td>
