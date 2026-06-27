@@ -724,7 +724,18 @@ def export_reports_excel(request):
 
         writer.writerow([
             clean_value(f'#{ticket.id}'),
+
             clean_value(ticket.interaction_id or ''),
+            clean_value(ticket.channel or ''),
+            clean_value(ticket.queue or ''),
+            clean_value(ticket.customer_name or ''),
+            clean_value(ticket.usd_customer_account_number or ''),
+            clean_value(ticket.zwg_customer_account_number or ''),
+            clean_value(ticket.customer_gender or ''),
+            clean_value(ticket.customer_phone_number or ''),
+            clean_value(ticket.customer_email or ''),
+            clean_value(ticket.other_customer_contact or ''),
+
             clean_value(ticket.title),
             clean_value((ticket.description[:300] + '...') if ticket.description and len(ticket.description) > 300 else (ticket.description or '')),
             clean_value(ticket.status or ''),
