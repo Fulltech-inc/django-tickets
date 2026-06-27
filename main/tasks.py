@@ -77,12 +77,40 @@ def generate_report_task(report_id):
         #writer.writerow([])
 
         writer.writerow([
-            'Ticket ID', 'Interaction ID', 'Title', 'Description', 'Status',
-            'Main Category', 'Sub Category', 'Owner', 'Assigned To', 'Waiting For',
-            'Created At', 'Last Updated', 'Closed At', 'Resolution Time (mins)',
-            'Escalated?', 'Escalation Level', 'Escalation Status',
-            'Escalated To', 'Escalated From', 'Escalated At', 'Escalation Acknowledged At',
-            'Follow-up Count', 'Attachment Count',
+            'Ticket ID',
+
+            'Interaction ID',
+            'Channel',
+            'Queue',
+            'Customer Name',
+            'USD Customer Account Number',
+            'ZWG Customer Account Number',
+            'Customer Gender',
+            'Customer Phone Number',
+            'Customer Email',
+            'Other Customer Contact',
+
+            'Title',
+            'Description', 
+            'Status',
+            'Main Category',
+            'Sub Category',
+            'Owner',
+            'Assigned To', 
+            'Waiting For',
+            'Created At',
+            'Last Updated',
+            'Closed At',
+            'Resolution Time (mins)',
+            'Escalated?',
+            'Escalation Level',
+            'Escalation Status',
+            'Escalated To',
+            'Escalated From',
+            'Escalated At',
+            'Escalation Acknowledged At',
+            'Follow-up Count',
+            'Attachment Count',
         ])
 
         for ticket in tickets:
@@ -108,7 +136,18 @@ def generate_report_task(report_id):
 
             writer.writerow([
                 f'#{ticket.id}',
+
                 ticket.interaction_id or '',
+                ticket.channel or '',
+                ticket.queue or '',
+                ticket.customer_name or '',
+                ticket.usd_customer_account_number or '',
+                ticket.zwg_customer_account_number or '',
+                ticket.customer_gender or '',
+                ticket.customer_phone_number or '',
+                ticket.customer_email or '',
+                ticket.other_customer_contact or '',
+
                 ticket.title,
                 (ticket.description[:300] + '...') if ticket.description and len(ticket.description) > 300 else (ticket.description or ''),
                 ticket.status or '',
